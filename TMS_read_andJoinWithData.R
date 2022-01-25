@@ -14,6 +14,16 @@ library(anytime)
 library(plyr)
 #path.to.data <- "C:/Users/NG.5027073/Dropbox (MNCN CSIC)/práce/Nagore uam/INVESTIGACION/2020 - DeWood Romania/EGM 4/"
 
+
+
+
+
+################################    This script has two parts. The one in which the air temperature during the measurement is paired with the measurement itself.#################################
+###############################     and the one in which respirations, corrections, and volumes are calculated ################################
+
+
+
+
 ######################### Important Readme  ##############################
 #The EGMs are configured with the Rumanian Time Zone, while the TMS are configured by default with the time zone of the last computer used 
 #to download de data. Normally, the Spanish Time Zone. Thus, this should be corrected everytime before Joining the data. Also take care
@@ -21,12 +31,12 @@ library(plyr)
 
 TimeCorrectionTMS <- 1 * 60 * 60 #The Time correction must be in seconds
 
-#Leemos el excell con los codigos de plot y muestra, separados por fecha
+#Read the excel with the Plots vs TMS codes 
 path.to.data <- "C:/Users/javie/OneDrive - UPNA/DeWood Project/"
 path.to.data <- "D:/OneDrive - UPNA/DeWood Project"
 setwd(path.to.data)
 
-#Cargar todos los archivos xlsx de la carpeta donde estan las medidas
+#Load all the files with the TMS measurements and format the columns.
 sensores_path <- paste(getwd(),"/TMS4/All days with plots/",sep = "") #TMS July
 sensores_path <- paste(getwd(),"/Respiration Campaign October 2021/TMS4/All days with plots/",sep = "")
 sensores_path <- paste(getwd(),"/Respiration Campaign December/TMS4/All days with plots/",sep = "")
@@ -51,6 +61,8 @@ ncol(lectura_sensores)
 # lectura_sensores$DateTime <- anytime(lectura_sensores$DateTime)
 
 
+##############   Read the file with the respiration measurements.
+#############   This file is normally separated in two, the one coming from the EGM 4 and EGM 5. We combine them here.
 
 setwd(path.to.data)
 datos_path1 <- paste(getwd(),"/Respiration Campaign July 2021/EGM_1/LM Results/Joined With Field Table/",sep = "")
@@ -73,24 +85,35 @@ files_nm2 <- list.files(datos_path2, pattern = ".csv")
 datos2 <- lapply(files_nm2,fread)
 tabla_datos2 <- rbindlist(datos2, fill = TRUE)
 
+#Combine both files
 tabla_datos <- rbind(tabladatos1,tabla_datos2)
-#Definir el año
+
+#Set the year
 year <- "2021"
 
-#Crear la columna con la fecha en formato correcto para la busqueda despues
+#Create Date Time column to be able to parse it in the future
 tabla_datos$Date <- paste(year,tabla_datos$Month,tabla_datos$Day, sep = "-")
 tabla_datos$Time <- paste(tabla_datos$Hour,tabla_datos$Min,"00",sep = ":")
 tabla_datos$DateTime <- paste(tabla_datos$Date,tabla_datos$Time)
 tabla_datos$DateTime <- ymd_hms(tabla_datos$DateTime)
 
+#Create a column with the location, Plot_subplot, for further joining with TMS data
 tabla_datos$Loc <- paste(tabla_datos$Plot,tabla_datos$SubPlot,sep = "_")
 lectura_sensores$Loc <- paste(lectura_sensores$Plot,lectura_sensores$Subplot,sep="_")
 
+#Extract the locations in a unique vector
 vct <- unique(tabla_datos$Loc)
  
+
+
+
 # A veces los sensores se descargan con una columna distinta al resto, en tal caso buscarlo y extraerlo para tratarlo aparte
 # sensordefect <- ymd_hms(lectura_sensores$DateTime[lectura_sensores$Loc == "1_2"])
 
+
+
+
+#Parse datetime and correct the time 
 lectura_sensores$DateTime <- ymd_hm(lectura_sensores$DateTime)
 lectura_sensores$DateTime <- lectura_sensores$DateTime + TimeCorrectionTMS
 
@@ -99,6 +122,9 @@ lectura_sensores$DateTime <- lectura_sensores$DateTime + TimeCorrectionTMS
 # 
 # lectura_sensores$DateTime <- lectura_sensores$DateTime + 3 * 60 * 60 #RECORDEMOS QUE LOS TMS ESTÁN 3 HORAS POR DETRÁS DE LOS EGM's
 # #######################   Representar valores de los TMS    ######################
+
+
+########################### The search for the closest time can take long with too many data. The measurements from the TMS must be filtered before##########################
 
 # establecer la fecha de comienzo de toma de datos
 startdate <- "2021-07-26 23:59:59"
@@ -112,7 +138,8 @@ lectura_sensores$DateTime <- lubridate::ymd_hms(lectura_sensores$DateTime)
 # filtrar por fecha
 all_sensors_byrow <- filter(lectura_sensores, DateTime > startdate)
 
-
+all_sensors_byrow$T3 <-as.numeric(all_sensors_byrow$T3)
+all_sensors_byrow$Subplot <- as.character(all_sensors_byrow$Subplot)
 # cambiar 
 # representar los datos
 # sens_temp_long <- gather(sens_tmp, Subplot ,T3, -c(DateTime, Plot,Subplot))
@@ -122,9 +149,9 @@ all_sensors_byrow <- filter(lectura_sensores, DateTime > startdate)
 #   facet_wrap(~ Plot) +
 #   theme_bw()
 
-all_sensors_byrow$T3 <-as.numeric(all_sensors_byrow$T3)
-all_sensors_byrow$Subplot <- as.character(all_sensors_byrow$Subplot)
-# all_sensors_byrow <- filter(all_sensors_byrow, Plot ==6 )
+
+
+############################ This part of the code is to represent the data from the TMS. Continue without this respiration measurements
 all_sensors_byrow$datehour <- cut(as.POSIXct(all_sensors_byrow$DateTime,format="%Y-%m-%d %H:%M:%S"), breaks = "hour")
 means <- aggregate(T3 ~ datehour, all_sensors_byrow, mean)
 means$datehour <- ymd_hms(means$datehour)
@@ -158,20 +185,8 @@ theme_bw()+
   
 sp
 
+#############################################################################################################################################
 
-    
-# # formato panel
-# ggplot(sens_temp_long, aes(x = DateTime, y = T3, color = Subplot)) +
-#   geom_line() +
-#   facet_wrap(~ Plot) +
-#   theme_bw()
-# 
-# # todo junto
-# ggplot(sens_temp_long, aes(x = datetime, y = temp, color = logger_number,
-#                            group=interaction(logger_number, sensor_number))) +
-#   ylim(c(10, 25)) +
-#   geom_line() +
-#   theme_bw()
 ########################### Joining the data of respiration with the temperatures #########################################3
 
 lectura_sensores <- filter(lectura_sensores, DateTime > startdate, DateTime < enddate)
@@ -185,7 +200,7 @@ reg_mat <- lapply(vct, function (x){
 })
 
 resultadofinal <- bind_rows(reg_mat)
-########################################Declaracion de variables con volumenes de camaras de flujo, discos, camaras, etc...
+########################################Set the variables of chamber volumes, discs, etc.... 
 
 soil_chamberL <- 1.171 #Disponible en el manual del SRC-1 pp systems
 tube_sectionsL <- 0.3927 #Tubo de 5 Cm de largo y 5 Cm radio
@@ -196,20 +211,20 @@ R_constant <- 0.08205746
 resultadofinal$T3K <- resultadofinal$T3 + 274.15
 ################################################################################################################################################
 
-#Asignar a cada tronco el volumen de camara apropiado                                           
+#Assign the correct volume chamber to each sample                                 
 resultadofinal <- resultadofinal %>% mutate(chambervolume =case_when(
   DiamClass==1 ~ sml_chmberL,
   DiamClass==10 ~ big_chmberL,
   DiamClass==25 ~ soil_chamberL + tube_sectionsL
   
 ))
-######  En ocasiones la presión ATM está dividida por 10. Aun no se por que.
+######  Sometimes, atmospheric pressure comes divided by 10. This must be controlled.
 resultadofinal <- resultadofinal %>% mutate(ATMP =case_when(
   ATMP< 0.1 ~ ATMP*10,
   ATMP>0.1 ~ ATMP
 ))
 
-#Calcular la respiración bajo la formula Resp= pendiente * (P*V)/(R*T)
+#Calculate respiration Resp= slope * (P*V)/(R*T)
 resultadofinal$volcm3/1000
 resultadofinal <- resultadofinal %>% mutate(respiration =case_when(
   DiamClass==1 ~ resultadofinal$slope *(resultadofinal$ATMP*(resultadofinal$chambervolume-(resultadofinal$Volcm3/1000)))/ (R_constant*resultadofinal$T3K),  #El volumen de los troncos está en cm3 = ml, lo paso a L para hacer el calculo
@@ -234,7 +249,7 @@ resultadofinal <- resultadofinal %>% mutate(RespCorrectedVolume =case_when(
 ))
 
 
-
+#Check if everything is well
 resultadofinal %>% group_by(DiamClass) %>%
   summarise_at(vars(respiration),
                list(name=mean))
@@ -245,9 +260,22 @@ resultadofinal %>% group_by(DiamClass) %>%
   summarise_at(vars(RespCorrectedVolume),
                list(name=mean))
 
+#Write the result. Watch the name, this script is for the measurement of each campaign. 
 write.csv(resultadofinal,"RESULTADOFINALJulio.csv")
 getwd()
 
+
+
+
+
+
+
+
+
+
+
+
+########################################IGNORE THIS###########################################
 # ##########################################REPRESENTACIÓN DE TEMPERATURAS(t1,t2,t3) POR FECHA#####################################################
 # #Filtros de fecha
 # startdate <- "2021-07-28"
