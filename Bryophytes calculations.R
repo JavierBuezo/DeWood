@@ -14,19 +14,20 @@ library(anytime)
 library(plyr)
 library(stringr)
 
-#########Leer los resultados
+##################################### Read the final results CSV, extract and present the data of the briophytes treated samples ##########################################
+
+#########Reading
 path.to.data <- "C:/Users/javie/OneDrive - UPNA/DeWood Project/Final results/CSV/"
 setwd(path.to.data)
 respiraciones <-fread("FinalResults_WDensities.csv")
 respiraciones$V1 <- NULL
-#Con este calculo pasamos los uM CO2, Cm2 ,S a: gr CO2, M2, minuto
+#All the respirations  comes in uM CO2, Cm2 ,S 
+#Normally they are represented in gr CO2, M2, minute
 respiraciones$RespCorrectedArea <- respiraciones$RespCorrectedArea *10000*0.000044 * 60
-
-#Con este calculo pasamos los uM CO2, Cm3 ,S a: gr CO2, M3, minuto
 respiraciones$RespCorrectedVolume <- respiraciones$RespCorrectedVolume *1000000*0.000044*60
 
 
-#Con este calculo pasamos los uM CO2, gr ,S a: ug CO2, gr DW, minuto
+#With this we calculate from uM CO2, gr ,S to ug CO2, gr DW, minute
 respiraciones$RespCorrectedgrams <- respiraciones$RespCorrectedgrams *0.000044*60 * 1000000
 
 
@@ -69,7 +70,7 @@ writeClipboard(as.character(briosddf))
 writeClipboard(as.character(restmeansdf))
 writeClipboard(as.character(restsddf))
 
-################# Para la estadística ######################
+################# Statistics  ######################
 
 tri.to.squ<-function(x)
 {
