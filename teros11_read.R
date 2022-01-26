@@ -1,5 +1,5 @@
 ###################################################@
-# CODIGO PARA EXTRAER Y LIMPIAR DATOS TEROS-11 ####
+# CODE TO EXTRACT AND CLEAN TEROS-11 SENSOR DATA ####
 ###################################################@
 
 # cargar librerias
@@ -19,7 +19,7 @@ path.to.wd <- "D:/OneDrive - UPNA/DeWood Project/Respiration Campaign December/"
 
 setwd(path.to.wd)
 
-# guardar la dirección a la carpeta en la que están los archivos
+# guardar la direcci?n a la carpeta en la que est?n los archivos
 path.to.data <- "C:/Users/javie/OneDrive - UPNA/DeWood Project/Respiration Campaign December/Teros"
 path.to.data <- "D:/OneDrive - UPNA/DeWood Project/Theros 11"
 path.to.data <- "D:/OneDrive - UPNA/DeWood Project/Respiration Campaign October 2021/Teros/"
@@ -30,13 +30,13 @@ files_path <- list.files(path.to.data, full.names = T, pattern = ".xlsx")
 # primero guardar los nombres de los archivos sin el directorio
 files_nm <- list.files(path.to.data, pattern = ".xlsx")
 
-# extraer el código de los sensores del nombre
-# cheatsheet para la manipulación de texto https://github.com/rstudio/cheatsheets/blob/master/strings.pdf
+# extraer el c?digo de los sensores del nombre
+# cheatsheet para la manipulaci?n de texto https://github.com/rstudio/cheatsheets/blob/master/strings.pdf
 teros_nm <- str_sub(files_nm, 1, 8)
 
 # leer todos los archivos de cada sensor, limpiar y pegar
-# lo hacemos utilizando una función que realiza operaciones recurrentes. 
-# Tutorial para entender aquí: https://www.datacamp.com/community/tutorials/r-tutorial-apply-family?utm_source=adwords_ppc&utm_campaignid=12492439802&utm_adgroupid=122563404161&utm_device=c&utm_keyword=r%20apply%20function&utm_matchtype=b&utm_network=g&utm_adpostion=&utm_creative=504158805004&utm_targetid=kwd-341048392010&utm_loc_interest_ms=&utm_loc_physical_ms=1011804&gclid=CjwKCAjwxo6IBhBKEiwAXSYBs6HCM0w5PfcqnwYdTJljOuK49AGKW-L3nxiOVx5g4NgzEWhaPIgFeRoCXK4QAvD_BwE
+# lo hacemos utilizando una funci?n que realiza operaciones recurrentes. 
+# Tutorial para entender aqu?: https://www.datacamp.com/community/tutorials/r-tutorial-apply-family?utm_source=adwords_ppc&utm_campaignid=12492439802&utm_adgroupid=122563404161&utm_device=c&utm_keyword=r%20apply%20function&utm_matchtype=b&utm_network=g&utm_adpostion=&utm_creative=504158805004&utm_targetid=kwd-341048392010&utm_loc_interest_ms=&utm_loc_physical_ms=1011804&gclid=CjwKCAjwxo6IBhBKEiwAXSYBs6HCM0w5PfcqnwYdTJljOuK49AGKW-L3nxiOVx5g4NgzEWhaPIgFeRoCXK4QAvD_BwE
 
 # leer los archivos y cambiar los encabezados
 # x <- files_path[7]
@@ -91,13 +91,13 @@ sens_temp_long <- gather(sens_tmp, sensor_number ,temp, -c(datetime, logger_numb
 sens_temp_long$logger_number <- substr(sens_temp_long$logger_number,1,2)
 sens_temp_long$sensor_code <- paste(sens_temp_long$logger_number,sens_temp_long$sensor_number,sep="")
 sens_temp_long$sensor_code <- gsub("T","WC",sens_temp_long$sensor_code)
-#Leer el archivo que indica a qué esta conectado cada sensor, y formatear la tabla.
+#Leer el archivo que indica a qu? esta conectado cada sensor, y formatear la tabla.
 path.to.codification <- "D:/OneDrive - UPNA/DeWood Project"
 path.to.codification <- "C:/Users/javie/OneDrive - UPNA/DeWood Project/"
 setwd(path.to.codification)
 codification <- read_excel("Tabla_sensores.xlsx",sheet = "Teros11")
 
-#Leer el archivo donde se resumen las características de cada muestra y formatear la tabla extrayendo del código los datos
+#Leer el archivo donde se resumen las caracter?sticas de cada muestra y formatear la tabla extrayendo del c?digo los datos
 Table_Field <- read_excel("Table field final.xlsx")
 Table_Field$DiamClass <- substr(Table_Field$Code,1,2)
 Table_Field$Plot <- substr(Table_Field$Code,5,5)
@@ -105,17 +105,17 @@ Table_Field$SubPlot <- substr(Table_Field$Code,7,7)
 Table_Field$Class <- substr(Table_Field$Code,9,9)
 Table_Field$Species <- substr(Table_Field$Code,10,11)
 
-#Unificar las tablas usando el código
+#Unificar las tablas usando el c?digo
 measurementmerged <- merge(sens_temp_long,codification,by="sensor_code")
 #Unificar la tabla con los datos de la muestra
 measurementmerged2 <-merge(measurementmerged,Table_Field, by="LABEL")
 
-#Separar los datos por hora, para hacer medias después
+#Separar los datos por hora, para hacer medias despu?s
 measurementmerged2$type <- paste(measurementmerged2$Species,measurementmerged2$DiamClass,measurementmerged2$Class,sep="_")
 measurementmerged2$datehour <- cut(as.POSIXct(measurementmerged2$datetime,format="%Y-%m-%d %H:%M:%S"), breaks = "hour") 
 measurementmerged2$datehour <- ymd_hms(measurementmerged2$datehour)
 
-#Esto es temporal, una muestra está mal apuntada. Se solucionará en el futuro. por el momento está de forma manual
+#Esto es temporal, una muestra est? mal apuntada. Se solucionar? en el futuro. por el momento est? de forma manual
 measurementmerged2$type <- gsub("FS_10_2", "FS_25_4",measurementmerged2$type)
 
 #Separar la tabla por tipo, que tiene en cuenta la especia, clase y diametros
@@ -138,7 +138,7 @@ ggplot(averages2, aes(x = datehour, y = temp)) +
   geom_hline(yintercept=0, linetype="dashed", color = "red")+
   # facet_wrap(~ logger_number) +
   labs(x = "Day", 
-       y = "Temperature (Cº)")+
+       y = "Temperature (C?)")+
   ylim(-5,10)+
   # xlim(as.Date(c("2021-12-01","2021-12-20")))+
   scale_x_datetime(labels = date_format("%d"),date_breaks = "24 hours")+
@@ -158,11 +158,11 @@ sens_WC_long <- gather(sens_WC, sensor_number ,temp, -c(datetime, logger_number)
 sens_WC_long$logger_number <- substr(sens_WC_long$logger_number,1,2)
 sens_WC_long$sensor_code <- paste(sens_WC_long$logger_number,sens_WC_long$sensor_number,sep="")
 
-#Leer el archivo que indica a qué esta conectado cada sensor, y formatear la tabla.
+#Leer el archivo que indica a qu? esta conectado cada sensor, y formatear la tabla.
 path.to.codification <- "D:/OneDrive - UPNA/DeWood Project"
 setwd(path.to.codification)
 codification <- read_excel("Tabla_sensores.xlsx",sheet = "Teros11")
-#Leer el archivo donde se resumen las características de cada muestra y formatear la tabla extrayendo del código los datos
+#Leer el archivo donde se resumen las caracter?sticas de cada muestra y formatear la tabla extrayendo del c?digo los datos
 Table_Field <- read_excel("Table field final.xlsx")
 Table_Field$DiamClass <- substr(Table_Field$Code,1,2)
 Table_Field$Plot <- substr(Table_Field$Code,5,5)
@@ -170,17 +170,17 @@ Table_Field$SubPlot <- substr(Table_Field$Code,7,7)
 Table_Field$Class <- substr(Table_Field$Code,9,9)
 Table_Field$Species <- substr(Table_Field$Code,10,11)
 
-#Unificar las tablas usando el código
+#Unificar las tablas usando el c?digo
 measurementmerged <- merge(sens_WC_long,codification,by="sensor_code")
 #Unificar la tabla con los datos de la muestra
 measurementmerged2 <-merge(measurementmerged,Table_Field, by="LABEL")
 
-#Separar los datos por hora, para hacer medias después
+#Separar los datos por hora, para hacer medias despu?s
 measurementmerged2$type <- paste(measurementmerged2$Species,measurementmerged2$DiamClass,measurementmerged2$Class,sep="_")
 measurementmerged2$datehour <- cut(as.POSIXct(measurementmerged2$datetime,format="%Y-%m-%d %H:%M:%S"), breaks = "hour") 
 measurementmerged2$datehour <- ymd_hms(filteredmeans$datehour)
 
-#Esto es temporal, una muestra está mal apuntada. Se solucionará en el futuro. por el momento está de forma manual
+#Esto es temporal, una muestra est? mal apuntada. Se solucionar? en el futuro. por el momento est? de forma manual
 measurementmerged2$type <- gsub("FS_10_2", "FS_25_4",measurementmerged2$type)
 
 #Separar la tabla por tipo, que tiene en cuenta la especia, clase y diametros
