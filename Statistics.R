@@ -10,10 +10,14 @@ library(ggpubr)
 library(corrplot)
 library(quantreg)
 library(openxlsx)
-
 library(easyGgplot2)
+
+path.to.dir <- "C:/Users/NG.5027073/Dropbox (SCENIC MNCN CSIC)/eclipseworkspace/DeWood/DeWood"
+setwd(path.to.dir)
+
 ############ Cleaning up data function ####################
-ID <- c("F69_102+109_7_29","88_369_7_28","37_140_7_27") #ID de las muestras Outliers a eliminar en la campaña de Julio
+
+ID <- c("F69_102+109_7_29","88_369_7_28","37_140_7_27") #ID de las muestras Outliers a eliminar en la campa?a de Julio
 
 malditos <- data.frame(ID)
 cleaningup <- function(y)
@@ -45,7 +49,8 @@ tri.to.squ<-function(x)
 }
 ###########################################################
 
-path.to.data <- "D:/OneDrive - UPNA/DeWood Project/Respiration Campaign July 2021/"
+path.to.data <-"C:/Users/NG.5027073/Dropbox (SCENIC MNCN CSIC)/eclipseworkspace/DeWood/DeWood/Files/Respiration Campaign July 2021"
+
 setwd(path.to.data)
 dir()
 full_df <- fread("RESULTADOFINALJulio.csv")
@@ -58,7 +63,7 @@ j <- filter(full_prepared, Species =="FS",DiamClass =="25")
 
 ##############################  Gather all the data from different CSV ######################
 
-path.to.data <- "C:/Users/javie/OneDrive - UPNA/DeWood Project/Final results/CSV/"
+path.to.data <- "C:/Users/NG.5027073/Dropbox (SCENIC MNCN CSIC)/eclipseworkspace/DeWood/DeWood/Files/Final results/CSV"
 #Cargar todos los archivoscsv de la carpeta
 files_path <- list.files(path.to.data, full.names = T, pattern = ".csv")
 #Guardar el nombre del archivo para usarlo despues como titulo
@@ -86,6 +91,7 @@ full_prepared$RespCorrectedVolume <- full_prepared$RespCorrectedVolume * 1000000
 
 #Con este calculo pasamos los uM CO2, gr ,S a: uM CO2, gr, minuto
 full_prepared$RespCorrectedgrams <- full_prepared$RespCorrectedgrams *0.000044*60 * 1000000
+
 ###################### Export averages to csv   ##################
 j <- full_prepared
 j <- full_prepared[ , c("Class","Bark(%)","Waterpercentage","T3","Soil_moist","RespCorrectedArea","RespCorrectedVolume","type2","RespCorrectedgrams")]           
@@ -119,6 +125,31 @@ getwd()
 prueba$RespCorrectedArea_se <- prueba$RespCorrectedArea_sd/sqrt(prueba$RespCorrectedArea_n)
 prueba$RespCorrectedVolume_se <- prueba$RespCorrectedVolume_sd/sqrt(prueba$RespCorrectedVolume_n)
 prueba$RespCorrectedgrams_se <- prueba$RespCorrectedgrams_sd/sqrt(prueba$RespCorrectedgrams_n)
+
+
+# modelos mixtos
+library(nlme)
+
+# quitar los NA de las variables con las que trabajo
+full_prepared_tmp <- full_prepared[full_prepared %>% dplyr::select(RespCorrectedArea, Species, DiamClass, Class) %>% complete.cases(),]
+
+simple <- gls(RespCorrectedArea ~ Species + DiamClass + Class,
+              method = "REML", data = full_prepared_tmp)
+
+random <- lme(RespCorrectedArea ~ Species + DiamClass + Class, data = full_prepared_tmp,
+              random = ~1|Plot...16, method = "REML")
+
+# compare results
+AIC <- AIC(simple, random)
+min_AIC <- AIC[which(AIC$AIC == min(AIC$AIC)),]
+AOV <- anova(simple, random)
+# here the p-value is not exact and should be smaller than the reported value (see Zuur page 144) --> to correct we divide by 2
+p_AOV <- AOV$`p-value`[2]/2
+res <- cbind(min_AIC, p_AOV)
+
+full_prepared <- lmer(RespCorrectedArea ~ Species + DiamClass + Class + (1 | Plot...16), data = full_prepared)
+summary(full_prepared)
+
 ################### BARPLOT ##########################
 
 j <- prueba
@@ -424,7 +455,7 @@ library(ggpubr)
 plots <- lapply(list1, function(x) ggplot(x, aes(T3, RespCorrectedArea,color = Class)) + 
                   temascatter +
                   geom_point(aes(color = Class),size=1) +
-                  labs(y=expression("g CO"[2]*" min"^-1*"m"^2),x="Temperature ºC")+
+                  labs(y=expression("g CO"[2]*" min"^-1*"m"^2),x="Temperature ?C")+
                   geom_smooth(method='lm')+
                   facet_wrap(~Class)+
                   stat_regline_equation(aes(label = ..rr.label..)))
@@ -432,7 +463,7 @@ plots
 plots <- lapply(list1, function(x) ggplot(x, aes(T3, RespCorrectedVolume,color = Class)) + 
                   temascatter +
                   geom_point(aes(color = Class),size=1) +
-                  labs(y=expression("g CO"[2]*" min"^-1*"m"^-3),x="Temperature ºC")+
+                  labs(y=expression("g CO"[2]*" min"^-1*"m"^-3),x="Temperature ?C")+
                   geom_smooth(method='lm')+
                   facet_wrap(~Class)+
                   stat_regline_equation(aes(label = ..rr.label..)))
@@ -440,7 +471,7 @@ plots <- lapply(list1, function(x) ggplot(x, aes(T3, RespCorrectedVolume,color =
 plots <- lapply(list1, function(x) ggplot(x, aes(T3, RespCorrectedgrams,color = Class)) + 
                   temascatter +
                   geom_point(aes(color = Class),size=1) +
-                  labs(y=expression(mu*"M CO"[2]* "min"-1*" g DW"^-1),x="Temperature ºC")+
+                  labs(y=expression(mu*"M CO"[2]* "min"-1*" g DW"^-1),x="Temperature ?C")+
                   geom_smooth(method='lm')+
                   facet_wrap(~Class)+
                   stat_regline_equation(aes(label = ..rr.label..)))
