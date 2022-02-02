@@ -1,10 +1,12 @@
 library(openxlsx)
 library(stringr)
+library(data.table)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
 path.to.data  <- "C:/Users/Javier/Documents/DeWood Git/DeWood/Files/"
+path.to.data  <- "C:/Users/javie/Documents/DeWood GitHub/DeWood/Files"
 setwd(path.to.data)
-
-path.to.data  <- "C:/Users/Javier/Documents/DeWood Git/DeWood/Files/"
-
 
 field_table <- read.xlsx("Table field final.xlsx")
 density_table <- fread("Density_table.csv")
@@ -32,7 +34,7 @@ all_table <- all_table %>% drop_na(SubPlot)
 
 
 all_table <- all_table %>% mutate(sample_length =case_when(
-  DiamClass=="01" ~ "5",
+  DiamClass=="01" ~ "10",
   DiamClass=="10" ~ "5",
   DiamClass=="25" ~ "5"
   
@@ -59,10 +61,12 @@ all_table$sample_density <- (all_table$`DW.(g)`/all_table$samplevolume) * 1000
 # all_table_25cm$vol_withethanol <- all_table_25cm$`volume of the sample`/5*all_table_25cm$`Length.(cm)`
 # j <- all_table_25cm
 # j<- filter(full_prepared,full_prepared$respiration>=0)
-j$type <- paste(j$Species,j$DiamClass)
-j$Class <- as.character(j$Class)
 
-list1 <- split(all_table,all_table$Species)
+
+# j$type <- paste(j$Species,j$DiamClass)
+# j$Class <- as.character(j$Class)
+# 
+# list1 <- split(all_table,all_table$Species)
 
 temascatter <- theme(plot.title = element_text(family = "Helvetica", face = "bold", size = (15)), 
                      legend.title = element_text(colour = "steelblue",  face = "bold.italic", family = "Helvetica"), 
@@ -70,7 +74,7 @@ temascatter <- theme(plot.title = element_text(family = "Helvetica", face = "bol
                      axis.title = element_text(family = "Helvetica", size = (10), colour = "steelblue4"),
                      axis.text = element_text(family = "Courier", colour = "cornflowerblue", size = (10)))
 ggplot(all_table,aes(Class,sample_density,color=Class))+
-      geom_point()+
+      geom_boxplot()+
       facet_wrap(~DiamClass+Species,scales="free",ncol=2)
 #ORDERFACTOR
 
