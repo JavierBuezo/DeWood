@@ -130,25 +130,86 @@ prueba$RespCorrectedgrams_se <- prueba$RespCorrectedgrams_sd/sqrt(prueba$RespCor
 # modelos mixtos
 library(nlme)
 
-# quitar los NA de las variables con las que trabajo
-full_prepared_tmp <- full_prepared[full_prepared %>% dplyr::select(RespCorrectedArea, Species, DiamClass, Class) %>% complete.cases(),]
+# code to do the selection of the random factor
+## model selection, first we try with different combinations of random effects
+# random factor
+# this is probably too complex, I tried all possible combinations
+# think what makes sense and simplify. Do the combinations make sense?
+rint <- c("(1|Plot...16)", "(1|SubPlot)", "(1|Plot...16/SubPlot)") # random intercepts
+rslopes <- c("(1+Class|Plot...16)","(1+Class|Subplot)","(1+Class|Plot...16/SubPlot)",         # random slope for Diamclass
+            "(1+Class|Plot...16)","(1+Class|Subplot)","(1+Class|Plot...16/SubPlot)",         # random slope for class
+            "(1+T3|Plot...16)","(1+T3|Subplot)","(1+T3|Plot...16/SubPlot)",         # random slope for time          
+            "(1+Species|Plot...16) + (1+DiamClass|Plot...16) + (1+Class|Plot...16/SubPlot) + (1+Month|Plot...16/SubPlot)"
+            )
 
-simple <- gls(RespCorrectedArea ~ Species + DiamClass + Class,
+# expand grid generates a matrix all the combinations between vectors
+vmat <- expand.grid(rint, rslopes)
+# we format the variables so that they are ok for the formula in lmer
+vr_tmp <- paste(vmat[,1], "+", vmat[,2])
+# we add the random intercepts, slopes and the combinations
+vr <- c(rint, rslopes, vr_tmp)
+
+# fixed factors
+vf <- c("Species * DiamClass * Class* T3")
+
+# prepare the dataframe removing the rows with NAs in our variables of interest
+full_prepared_tmp <- full_prepared[full_prepared %>% dplyr::select(RespCorrectedgrams, Species, DiamClass, Class) %>% complete.cases(),]
+
+# model without random factors
+simple <- gls(RespCorrectedgrams ~ Species + DiamClass + Class + T3,
               method = "REML", data = full_prepared_tmp)
 
-random <- lme(RespCorrectedArea ~ Species + DiamClass + Class, data = full_prepared_tmp,
-              random = ~1|Plot...16, method = "REML")
+# run all the models
+# rn <- vr[1]
+random_mod <- lapply(vr, function(rn){
+  form <- formula(paste0("RespCorrectedgrams~", vf, "+",rn))
+  mod_rn <- tryCatch(lmer(form, data = full_prepared_tmp), error = function(e) NA)
+})
 
-# compare results
-AIC <- AIC(simple, random)
-min_AIC <- AIC[which(AIC$AIC == min(AIC$AIC)),]
-AOV <- anova(simple, random)
-# here the p-value is not exact and should be smaller than the reported value (see Zuur page 144) --> to correct we divide by 2
-p_AOV <- AOV$`p-value`[2]/2
-res <- cbind(min_AIC, p_AOV)
+# AIC of the random models
+AIC_rs <- ldply(random_mod, function(mod) tryCatch(AIC(mod),error = function(e) NA))
+AIC_rs <- data.frame(vr, AIC=AIC_rs)
 
-full_prepared <- lmer(RespCorrectedArea ~ Species + DiamClass + Class + (1 | Plot...16), data = full_prepared)
-summary(full_prepared)
+# paste the AIC of the model without any random factors for comparison
+AIC_simple <- data.frame(vr = "", V1 = AIC(simple))
+AIC_rs <- rbind(AIC_simple, AIC_rs)
+View(AIC_rs)
+selected_random <- AIC_rs[which(AIC_rs[,2] == min(AIC_rs[,2], na.rm = T )),]
+# however this model is overly complex. When we fit it the matrix is singular
+# so I select the model with the lowest AIC that is not overly complex --> model 4
+
+# fixed variable selection
+library(MuMIn)
+
+full_form <- formula(paste0("RespCorrectedgrams~", vf))
+full_mod <- lme(full_form, random = ~ 1 | Plot...16, data = full_prepared_tmp)
+# model selection
+res <- dredge(full_mod, trace=2)
+
+# variable importance
+importance(res)
+selected_mod <- get.models(res, subset = 1, method = "REML")[[1]]
+piecewiseSEM::rsquared(selected_mod)
+
+# install.packages("coefplot2",
+#                  repos="http://www.math.mcmaster.ca/bolker/R",
+#                  type="source")
+
+# results graph
+library(coefplot2)
+coefplot2(selected_mod)
+
+# since the graph above is a little uggly we made our own7
+ff <- fortify(coeftab(selected_mod))
+ff$pnames <- rownames(ff)
+colnames(ff) <- c("Estimate", "Std.Error","y2", "y25","y75","y97","pnames")
+ggplot() + 
+  geom_pointrange(data=ff, mapping=aes(x=pnames, y=Estimate, ymin=y2, ymax=y97),
+                  size=1, color="blue", fill="white", shape=22) +
+  geom_hline(yintercept = 0, linetype = 3) +
+  theme_bw(base_size = 12) # this is a nice theme + selection of letter size
+
+
 
 ################### BARPLOT ##########################
 
