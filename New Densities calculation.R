@@ -5,10 +5,14 @@ library(dplyr)
 library(tidyr)
 library(ggplot2)
 library(plyr)
-path.to.data  <- "C:/Users/Javier/Documents/DeWood Git/DeWood/Files/"
-path.to.data  <- "C:/Users/javie/Documents/DeWood GitHub/DeWood/Files"
+path.to.data <- "C:/Users/NG.5027073/Dropbox (SCENIC MNCN CSIC)/eclipseworkspace/DeWood/DeWood/Files/Final results/CSV"
+path.to.data  <- "C:/Users/Javier/Documents/DeWood Git/DeWood/Files/Final results/CSV"
+path.to.data  <- "C:/Users/javie/Documents/DeWood GitHub/DeWood/Files/Final results/CSV"
 setwd(path.to.data)
 
+
+
+  
 field_table <- read.xlsx("Table field final.xlsx")
 density_table <- fread("Density_table.csv")
 colnames(density_table)[1] <- "LABEL"
@@ -79,14 +83,22 @@ dat2 <- ddply(all_table, ~ type, transform, sample_density = impute.mean(sample_
 # 
 # list1 <- split(all_table,all_table$Species)
 
+
 temascatter <- theme(plot.title = element_text(family = "Helvetica", face = "bold", size = (15)), 
                      legend.title = element_text(colour = "steelblue",  face = "bold.italic", family = "Helvetica"), 
                      legend.text = element_text(face = "italic", colour="steelblue4",family = "Helvetica"), 
                      axis.title = element_text(family = "Helvetica", size = (10), colour = "steelblue4"),
                      axis.text = element_text(family = "Courier", colour = "cornflowerblue", size = (10)))
-ggplot(dat2,aes(Class,sample_density,color=Class))+
-      geom_boxplot()+
-      facet_wrap(~DiamClass+Species,scales="free",ncol=2)
+
+
+
+
+
+
+
+ggplot(full_df2,aes(Class,resptemporal,color=Class))+
+  geom_point()+
+  facet_wrap(~DiamClass+Species,scales="free",ncol=2)
 #ORDERFACTOR
 
 names(dat2)[names(dat2) == 'LABEL'] <- "sample_code"
@@ -94,27 +106,37 @@ names(dat2)[names(dat2) == 'LABEL'] <- "sample_code"
 dat3 <- dat2 %>% select(c("sample_code","sample_density"))
 
 
-write.csv(dat2,"Field_tableW_New_Densities")
+write.csv(dat2,"Field_tableW_New_Densities.csv")
 
 
-plots <- lapply(j, function(x) ggplot(x, aes(DiamClass, sample_density,color =Class)) + 
-                  temascatter +
-                  geom_point(aes(color = Class),size=1))
-                  
-            getwd()
-                  
-plots
-plot <- ggplot(all_table, aes(DiamClass,sample_density, color=Species)) + 
-  temascatter +
-  geom_point(aes(color = Class),size=1) +
-  geom_abline(slope = 1,intercept = 0)
-  # facet_wrap(~DiamClass)
-  # geom_smooth(method="lm")
-  # labs(y=expression("g CO"[2]*" min"^-1*"m"^2),x="Temperature ?C")+
-  # geom_smooth(method='lm')+
-  # facet_wrap(~Class)+
-  # stat_regline_equation(aes(label = ..rr.label..))
-plots
+files_path <- list.files(path.to.data, full.names = T, pattern = ".csv")
+#Guardar el nombre del archivo para usarlo despues como titulo
+files_nm <- list.files(path.to.data, pattern = ".csv")
 
-  
-field_table$density <- pi * field_table$`D1.(cm)`                          
+full_df <- list.files(path.to.data, full.names = TRUE, pattern = ".csv") %>% lapply(fread) %>% 
+  bind_rows()
+full_df$sample_code <- as.character(full_df$sample_code)
+full_df2 <- left_join(full_df,dat3, by = "sample_code")
+
+
+full_df2$sample_density <- full_df2$sample_density/1000 
+full_df2$RespCorrectedgrams <- full_df2$RespCorrectedVolume / full_df2$sample_density
+
+full_df2$resp_g_kg_day <- full_df2$RespCorrectedgrams *0.000044*60*60*24*1000 #gr CO2, Kg DW-1 d -1
+
+
+
+
+####This GGPLOT represents automatically the average of each group
+full_df2$Class <- as.character(full_df2$Class)
+filtrado <- filter(full_df2,Month == "7")
+filtrado %>% 
+  ggplot(aes(Class,resp_g_kg_day,fill = Class))+
+  stat_summary(fun="mean",geom="bar", alpha=.7)+
+  stat_summary(fun.data = "mean_cl_normal",
+               geom="errorbar",
+               width=.2)+
+  # geom_bar(stat = "summary",fun="mean")+
+  # geom_errorbar(stat= "summary", fun="mean_se")+
+  facet_wrap(~DiamClass+Species,scales="free",ncol=2)
+
