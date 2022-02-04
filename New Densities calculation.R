@@ -48,22 +48,13 @@ all_table$sample_density <- (all_table$`DW.(g)`/all_table$samplevolume) * 1000
 
 all_table$type <- paste(all_table$Species,all_table$DiamClass,all_table$Class,sep="")
 
-lista <- split(all_table, all_table$type)
 
-vct <- unique(all_table$type)
+library(plyr)
+impute.mean <- function(x) replace(x, is.na(x), mean(x, na.rm = TRUE))
+dat2 <- ddply(all_table, ~ type, transform, sample_density = impute.mean(sample_density))
 
-lapply()
 
-prueba <- lapply(lista, function(x){
-  
-  x$sample_density[is.na(x$sample_density)] <- mean(x$sample_density,na.rm = TRUE)
-  
-  
-  
-})
 
-prueba2 <- ldply(prueba,data.frame)
-data1$x1[is.na(data1$x1)] <- mean(data1$x1, na.rm = TRUE)
 
 
 # all_table$sample_length <- as.numeric(all_table$sample_length)
@@ -93,17 +84,24 @@ temascatter <- theme(plot.title = element_text(family = "Helvetica", face = "bol
                      legend.text = element_text(face = "italic", colour="steelblue4",family = "Helvetica"), 
                      axis.title = element_text(family = "Helvetica", size = (10), colour = "steelblue4"),
                      axis.text = element_text(family = "Courier", colour = "cornflowerblue", size = (10)))
-ggplot(all_table,aes(Class,sample_density,color=Class))+
+ggplot(dat2,aes(Class,sample_density,color=Class))+
       geom_boxplot()+
       facet_wrap(~DiamClass+Species,scales="free",ncol=2)
 #ORDERFACTOR
 
+names(dat2)[names(dat2) == 'LABEL'] <- "sample_code"
+
+dat3 <- dat2 %>% select(c("sample_code","sample_density"))
+
+
+write.csv(dat2,"Field_tableW_New_Densities")
+
 
 plots <- lapply(j, function(x) ggplot(x, aes(DiamClass, sample_density,color =Class)) + 
                   temascatter +
-                  geom_point(aes(color = Class),size=1))+
+                  geom_point(aes(color = Class),size=1))
                   
-            
+            getwd()
                   
 plots
 plot <- ggplot(all_table, aes(DiamClass,sample_density, color=Species)) + 
