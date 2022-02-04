@@ -4,6 +4,7 @@ library(data.table)
 library(dplyr)
 library(tidyr)
 library(ggplot2)
+library(plyr)
 path.to.data  <- "C:/Users/Javier/Documents/DeWood Git/DeWood/Files/"
 path.to.data  <- "C:/Users/javie/Documents/DeWood GitHub/DeWood/Files"
 setwd(path.to.data)
@@ -44,6 +45,25 @@ all_table$sample_length <- as.numeric(all_table$sample_length)
 all_table$meanradius <- ((all_table$`D1.(cm)`+all_table$`D2.(cm)`+all_table$`D3.(cm)`+all_table$`D4.(cm)`)/4)/2
 all_table$samplevolume <- pi * (all_table$meanradius^2) * all_table$sample_length
 all_table$sample_density <- (all_table$`DW.(g)`/all_table$samplevolume) * 1000
+
+all_table$type <- paste(all_table$Species,all_table$DiamClass,all_table$Class,sep="")
+
+lista <- split(all_table, all_table$type)
+
+vct <- unique(all_table$type)
+
+lapply()
+
+prueba <- lapply(lista, function(x){
+  
+  x$sample_density[is.na(x$sample_density)] <- mean(x$sample_density,na.rm = TRUE)
+  
+  
+  
+})
+
+prueba2 <- ldply(prueba,data.frame)
+data1$x1[is.na(data1$x1)] <- mean(data1$x1, na.rm = TRUE)
 
 
 # all_table$sample_length <- as.numeric(all_table$sample_length)
