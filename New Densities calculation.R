@@ -124,8 +124,8 @@ full_df2$RespCorrectedgrams <- full_df2$RespCorrectedVolume / full_df2$sample_de
 
 full_df2$resp_g_kg_day <- full_df2$RespCorrectedgrams *0.000044*60*60*24*1000 #gr CO2, Kg DW-1 d -1
 
-
-
+write.csv(full_df2,"FinalResults_WDensities.csv")
+getwd()
 
 ####This GGPLOT represents automatically the average of each group
 full_df2$Class <- as.character(full_df2$Class)
