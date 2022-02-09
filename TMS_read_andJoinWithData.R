@@ -12,7 +12,7 @@ library(data.table)
 library(bayesbio)
 library(anytime)
 library(plyr)
-#path.to.data <- "C:/Users/NG.5027073/Dropbox (MNCN CSIC)/práce/Nagore uam/INVESTIGACION/2020 - DeWood Romania/EGM 4/"
+#path.to.data <- "C:/Users/NG.5027073/Dropbox (MNCN CSIC)/pr?ce/Nagore uam/INVESTIGACION/2020 - DeWood Romania/EGM 4/"
 
 
 
@@ -120,7 +120,7 @@ lectura_sensores$DateTime <- lectura_sensores$DateTime + TimeCorrectionTMS
 # lectura_sensores$DateTime[lectura_sensores$Loc=="1_2"] <- sensordefect
 # 
 # 
-# lectura_sensores$DateTime <- lectura_sensores$DateTime + 3 * 60 * 60 #RECORDEMOS QUE LOS TMS ESTÁN 3 HORAS POR DETRÁS DE LOS EGM's
+# lectura_sensores$DateTime <- lectura_sensores$DateTime + 3 * 60 * 60 #RECORDEMOS QUE LOS TMS EST?N 3 HORAS POR DETR?S DE LOS EGM's
 # #######################   Representar valores de los TMS    ######################
 
 
@@ -136,7 +136,7 @@ enddate <- lubridate::ymd_hms(enddate)
 lectura_sensores$DateTime <- lubridate::ymd_hms(lectura_sensores$DateTime) 
 
 # filtrar por fecha
-all_sensors_byrow <- filter(lectura_sensores, DateTime > startdate)
+all_sensors_byrow <- filter(lectura_sensores, DateTime > startdate, DateTime < enddate)
 
 all_sensors_byrow$T3 <-as.numeric(all_sensors_byrow$T3)
 all_sensors_byrow$Subplot <- as.character(all_sensors_byrow$Subplot)
@@ -205,7 +205,7 @@ resultadofinal <- bind_rows(reg_mat)
 soil_chamberL <- 1.171 #Disponible en el manual del SRC-1 pp systems
 tube_sectionsL <- 0.3927 #Tubo de 5 Cm de largo y 5 Cm radio
 tube_section_areacm2 <- pi * (5^2)
-big_chmberL <- 11.661397 # El volumen de esta cámara cambió de Julio a Octubre. CUIDADO Nagore: 8.256498L, DuckTapeBehemoth: 11.661397L  2915,39 Por medir
+big_chmberL <- 11.661397 # El volumen de esta c?mara cambi? de Julio a Octubre. CUIDADO Nagore: 8.256498L, DuckTapeBehemoth: 11.661397L  2915,39 Por medir
 sml_chmberL <- 1.306706 
 R_constant <- 0.08205746
 resultadofinal$T3K <- resultadofinal$T3 + 274.15
@@ -227,7 +227,7 @@ resultadofinal <- resultadofinal %>% mutate(ATMP =case_when(
 #Calculate respiration Resp= slope * (P*V)/(R*T)
 resultadofinal$volcm3/1000
 resultadofinal <- resultadofinal %>% mutate(respiration =case_when(
-  DiamClass==1 ~ resultadofinal$slope *(resultadofinal$ATMP*(resultadofinal$chambervolume-(resultadofinal$Volcm3/1000)))/ (R_constant*resultadofinal$T3K),  #El volumen de los troncos está en cm3 = ml, lo paso a L para hacer el calculo
+  DiamClass==1 ~ resultadofinal$slope *(resultadofinal$ATMP*(resultadofinal$chambervolume-(resultadofinal$Volcm3/1000)))/ (R_constant*resultadofinal$T3K),  #El volumen de los troncos est? en cm3 = ml, lo paso a L para hacer el calculo
   DiamClass==10 ~ resultadofinal$slope *(resultadofinal$ATMP*(resultadofinal$chambervolume-(resultadofinal$Volcm3/1000)))/ (R_constant*resultadofinal$T3K),
   DiamClass==25 ~ resultadofinal$slope *(resultadofinal$ATMP*(resultadofinal$chambervolume))/ (R_constant*resultadofinal$T3K)
   
@@ -239,13 +239,13 @@ resultadofinal <- resultadofinal %>% mutate(respiration =case_when(
 resultadofinal <- resultadofinal %>% mutate(RespCorrectedArea =case_when(
   DiamClass==1 ~ resultadofinal$respiration / resultadofinal$Areacm2,
   DiamClass==10 ~ resultadofinal$respiration / resultadofinal$Areacm2,
-  DiamClass==25 ~ resultadofinal$respiration / tube_section_areacm2  #El area medida en esta clase de diámetro es diferente
+  DiamClass==25 ~ resultadofinal$respiration / tube_section_areacm2  #El area medida en esta clase de di?metro es diferente
 ))
 
 resultadofinal <- resultadofinal %>% mutate(RespCorrectedVolume =case_when(
   DiamClass==1 ~ resultadofinal$respiration / resultadofinal$Volcm3,
   DiamClass==10 ~ resultadofinal$respiration / resultadofinal$Volcm3,
-  DiamClass==25 ~ resultadofinal$RespCorrectedArea * resultadofinal$Areacm2 / resultadofinal$Volcm3  #El area medida en esta clase de diámetro es diferente
+  DiamClass==25 ~ resultadofinal$RespCorrectedArea * resultadofinal$Areacm2 / resultadofinal$Volcm3  #El area medida en esta clase de di?metro es diferente
 ))
 
 
@@ -276,7 +276,7 @@ getwd()
 
 
 ########################################IGNORE THIS###########################################
-# ##########################################REPRESENTACIÓN DE TEMPERATURAS(t1,t2,t3) POR FECHA#####################################################
+# ##########################################REPRESENTACI?N DE TEMPERATURAS(t1,t2,t3) POR FECHA#####################################################
 # #Filtros de fecha
 # startdate <- "2021-07-28"
 # enddate <- "2021-07-29"
@@ -308,7 +308,7 @@ getwd()
 # path.to.wd <- "C:/Users/javie/OneDrive - UPNA/DeWood Project/Theros 11"
 # setwd(path.to.wd)
 # 
-# # guardar la dirección a la carpeta en la que están los archivos
+# # guardar la direcci?n a la carpeta en la que est?n los archivos
 # path.to.data <- "C:/Users/javie/OneDrive - UPNA/DeWood Project/Theros 11"
 # # cargar todos los archivos de la carpeta
 # files_path <- list.files(path.to.data, full.names = T, pattern = ".xlsx")
@@ -317,13 +317,13 @@ getwd()
 # # primero guardar los nombres de los archivos sin el directorio
 # files_nm <- list.files(path.to.data, pattern = ".xlsx")
 # 
-# # extraer el código de los sensores del nombre
-# # cheatsheet para la manipulación de texto https://github.com/rstudio/cheatsheets/blob/master/strings.pdf
+# # extraer el c?digo de los sensores del nombre
+# # cheatsheet para la manipulaci?n de texto https://github.com/rstudio/cheatsheets/blob/master/strings.pdf
 # teros_nm <- str_sub(files_nm, 1, 8)
 # 
 # # leer todos los archivos de cada sensor, limpiar y pegar
-# # lo hacemos utilizando una función que realiza operaciones recurrentes. 
-# # Tutorial para entender aquí: https://www.datacamp.com/community/tutorials/r-tutorial-apply-family?utm_source=adwords_ppc&utm_campaignid=12492439802&utm_adgroupid=122563404161&utm_device=c&utm_keyword=r%20apply%20function&utm_matchtype=b&utm_network=g&utm_adpostion=&utm_creative=504158805004&utm_targetid=kwd-341048392010&utm_loc_interest_ms=&utm_loc_physical_ms=1011804&gclid=CjwKCAjwxo6IBhBKEiwAXSYBs6HCM0w5PfcqnwYdTJljOuK49AGKW-L3nxiOVx5g4NgzEWhaPIgFeRoCXK4QAvD_BwE
+# # lo hacemos utilizando una funci?n que realiza operaciones recurrentes. 
+# # Tutorial para entender aqu?: https://www.datacamp.com/community/tutorials/r-tutorial-apply-family?utm_source=adwords_ppc&utm_campaignid=12492439802&utm_adgroupid=122563404161&utm_device=c&utm_keyword=r%20apply%20function&utm_matchtype=b&utm_network=g&utm_adpostion=&utm_creative=504158805004&utm_targetid=kwd-341048392010&utm_loc_interest_ms=&utm_loc_physical_ms=1011804&gclid=CjwKCAjwxo6IBhBKEiwAXSYBs6HCM0w5PfcqnwYdTJljOuK49AGKW-L3nxiOVx5g4NgzEWhaPIgFeRoCXK4QAvD_BwE
 # 
 # # leer los archivos y cambiar los encabezados
 # # x <- files_path[7]
