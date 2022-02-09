@@ -1,10 +1,23 @@
 library(openxlsx)
 library(stringr)
+
+
 path.to.data  <- "C:/Users/Javier/Documents/DeWood Git/DeWood/Files/"
 setwd(path.to.data)
 
 path.to.data  <- "C:/Users/Javier/Documents/DeWood Git/DeWood/Files/"
 
+
+
+library(data.table)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(plyr)
+path.to.data <- "C:/Users/NG.5027073/Dropbox (SCENIC MNCN CSIC)/eclipseworkspace/DeWood/DeWood/Files/Final results/CSV"
+path.to.data  <- "C:/Users/Javier/Documents/DeWood Git/DeWood/Files/Final results/CSV"
+path.to.data  <- "C:/Users/javie/Documents/DeWood GitHub/DeWood/Files/Final results/CSV"
+setwd(path.to.data)
 
 field_table <- read.xlsx("Table field final.xlsx")
 density_table <- fread("Density_table.csv")
@@ -32,7 +45,8 @@ all_table <- all_table %>% drop_na(SubPlot)
 
 
 all_table <- all_table %>% mutate(sample_length =case_when(
-  DiamClass=="01" ~ "5",
+
+  DiamClass=="01" ~ "10",
   DiamClass=="10" ~ "5",
   DiamClass=="25" ~ "5"
   
@@ -42,6 +56,16 @@ all_table$sample_length <- as.numeric(all_table$sample_length)
 all_table$meanradius <- ((all_table$`D1.(cm)`+all_table$`D2.(cm)`+all_table$`D3.(cm)`+all_table$`D4.(cm)`)/4)/2
 all_table$samplevolume <- pi * (all_table$meanradius^2) * all_table$sample_length
 all_table$sample_density <- (all_table$`DW.(g)`/all_table$samplevolume) * 1000
+
+
+all_table$type <- paste(all_table$Species,all_table$DiamClass,all_table$Class,sep="")
+
+
+library(plyr)
+impute.mean <- function(x) replace(x, is.na(x), mean(x, na.rm = TRUE))
+dat2 <- ddply(all_table, ~ type, transform, sample_density = impute.mean(sample_density))
+
+
 
 
 # all_table$sample_length <- as.numeric(all_table$sample_length)
@@ -59,16 +83,27 @@ all_table$sample_density <- (all_table$`DW.(g)`/all_table$samplevolume) * 1000
 # all_table_25cm$vol_withethanol <- all_table_25cm$`volume of the sample`/5*all_table_25cm$`Length.(cm)`
 # j <- all_table_25cm
 # j<- filter(full_prepared,full_prepared$respiration>=0)
+
 j$type <- paste(j$Species,j$DiamClass)
 j$Class <- as.character(j$Class)
 
 list1 <- split(all_table,all_table$Species)
+
+
+
+# j$type <- paste(j$Species,j$DiamClass)
+# j$Class <- as.character(j$Class)
+# 
+# list1 <- split(all_table,all_table$Species)
+
+
 
 temascatter <- theme(plot.title = element_text(family = "Helvetica", face = "bold", size = (15)), 
                      legend.title = element_text(colour = "steelblue",  face = "bold.italic", family = "Helvetica"), 
                      legend.text = element_text(face = "italic", colour="steelblue4",family = "Helvetica"), 
                      axis.title = element_text(family = "Helvetica", size = (10), colour = "steelblue4"),
                      axis.text = element_text(family = "Courier", colour = "cornflowerblue", size = (10)))
+
 ggplot(all_table,aes(Class,sample_density,color=Class))+
       geom_point()+
       facet_wrap(~DiamClass+Species,scales="free",ncol=2)
@@ -96,3 +131,55 @@ plots
 
   
 field_table$density <- pi * field_table$`D1.(cm)`                          
+
+
+
+
+
+
+
+ggplot(full_df2,aes(Class,resptemporal,color=Class))+
+  geom_point()+
+  facet_wrap(~DiamClass+Species,scales="free",ncol=2)
+#ORDERFACTOR
+
+names(dat2)[names(dat2) == 'LABEL'] <- "sample_code"
+
+dat3 <- dat2 %>% select(c("sample_code","sample_density"))
+
+
+write.csv(dat2,"Field_tableW_New_Densities.csv")
+
+
+files_path <- list.files(path.to.data, full.names = T, pattern = ".csv")
+#Guardar el nombre del archivo para usarlo despues como titulo
+files_nm <- list.files(path.to.data, pattern = ".csv")
+
+full_df <- list.files(path.to.data, full.names = TRUE, pattern = ".csv") %>% lapply(fread) %>% 
+  bind_rows()
+full_df$sample_code <- as.character(full_df$sample_code)
+full_df2 <- left_join(full_df,dat3, by = "sample_code")
+
+
+full_df2$sample_density <- full_df2$sample_density/1000 
+full_df2$RespCorrectedgrams <- full_df2$RespCorrectedVolume / full_df2$sample_density
+
+full_df2$resp_g_kg_day <- full_df2$RespCorrectedgrams *0.000044*60*60*24*1000 #gr CO2, Kg DW-1 d -1
+
+write.csv(full_df2,"FinalResults_WDensities.csv")
+getwd()
+
+####This GGPLOT represents automatically the average of each group
+full_df2$Class <- as.character(full_df2$Class)
+filtrado <- filter(full_df2,Month == "7")
+filtrado %>% 
+  ggplot(aes(Class,resp_g_kg_day,fill = Class))+
+  stat_summary(fun="mean",geom="bar", alpha=.7)+
+  stat_summary(fun.data = "mean_cl_normal",
+               geom="errorbar",
+               width=.2)+
+  # geom_bar(stat = "summary",fun="mean")+
+  # geom_errorbar(stat= "summary", fun="mean_se")+
+  facet_wrap(~DiamClass+Species,scales="free",ncol=2)
+
+

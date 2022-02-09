@@ -10,10 +10,14 @@ library(ggpubr)
 library(corrplot)
 library(quantreg)
 library(openxlsx)
-
 library(easyGgplot2)
+
+path.to.dir <- "C:/Users/NG.5027073/Dropbox (SCENIC MNCN CSIC)/eclipseworkspace/DeWood/DeWood"
+setwd(path.to.dir)
+
 ############ Cleaning up data function ####################
-ID <- c("F69_102+109_7_29","88_369_7_28","37_140_7_27") #ID de las muestras Outliers a eliminar en la campaña de Julio
+
+ID <- c("F69_102+109_7_29","88_369_7_28","37_140_7_27") #ID de las muestras Outliers a eliminar en la campa?a de Julio
 
 malditos <- data.frame(ID)
 cleaningup <- function(y)
@@ -45,7 +49,8 @@ tri.to.squ<-function(x)
 }
 ###########################################################
 
-path.to.data <- "D:/OneDrive - UPNA/DeWood Project/Respiration Campaign July 2021/"
+path.to.data <-"C:/Users/NG.5027073/Dropbox (SCENIC MNCN CSIC)/eclipseworkspace/DeWood/DeWood/Files/Respiration Campaign July 2021"
+
 setwd(path.to.data)
 dir()
 full_df <- fread("RESULTADOFINALJulio.csv")
@@ -58,7 +63,7 @@ j <- filter(full_prepared, Species =="FS",DiamClass =="25")
 
 ##############################  Gather all the data from different CSV ######################
 
-path.to.data <- "C:/Users/javie/OneDrive - UPNA/DeWood Project/Final results/CSV/"
+path.to.data <- "C:/Users/NG.5027073/Dropbox (SCENIC MNCN CSIC)/eclipseworkspace/DeWood/DeWood/Files/Final results/CSV"
 #Cargar todos los archivoscsv de la carpeta
 files_path <- list.files(path.to.data, full.names = T, pattern = ".csv")
 #Guardar el nombre del archivo para usarlo despues como titulo
@@ -86,6 +91,7 @@ full_prepared$RespCorrectedVolume <- full_prepared$RespCorrectedVolume * 1000000
 
 #Con este calculo pasamos los uM CO2, gr ,S a: uM CO2, gr, minuto
 full_prepared$RespCorrectedgrams <- full_prepared$RespCorrectedgrams *0.000044*60 * 1000000
+
 ###################### Export averages to csv   ##################
 j <- full_prepared
 j <- full_prepared[ , c("Class","Bark(%)","Waterpercentage","T3","Soil_moist","RespCorrectedArea","RespCorrectedVolume","type2","RespCorrectedgrams")]           
@@ -119,6 +125,92 @@ getwd()
 prueba$RespCorrectedArea_se <- prueba$RespCorrectedArea_sd/sqrt(prueba$RespCorrectedArea_n)
 prueba$RespCorrectedVolume_se <- prueba$RespCorrectedVolume_sd/sqrt(prueba$RespCorrectedVolume_n)
 prueba$RespCorrectedgrams_se <- prueba$RespCorrectedgrams_sd/sqrt(prueba$RespCorrectedgrams_n)
+
+
+# modelos mixtos
+library(nlme)
+
+# code to do the selection of the random factor
+## model selection, first we try with different combinations of random effects
+# random factor
+# this is probably too complex, I tried all possible combinations
+# think what makes sense and simplify. Do the combinations make sense?
+rint <- c("(1|Plot...16)", "(1|SubPlot)", "(1|Plot...16/SubPlot)") # random intercepts
+rslopes <- c("(1+Class|Plot...16)","(1+Class|Subplot)","(1+Class|Plot...16/SubPlot)",         # random slope for Diamclass
+            "(1+Class|Plot...16)","(1+Class|Subplot)","(1+Class|Plot...16/SubPlot)",         # random slope for class
+            "(1+T3|Plot...16)","(1+T3|Subplot)","(1+T3|Plot...16/SubPlot)",         # random slope for time          
+            "(1+Species|Plot...16) + (1+DiamClass|Plot...16) + (1+Class|Plot...16/SubPlot) + (1+Month|Plot...16/SubPlot)"
+            )
+
+# expand grid generates a matrix all the combinations between vectors
+vmat <- expand.grid(rint, rslopes)
+# we format the variables so that they are ok for the formula in lmer
+vr_tmp <- paste(vmat[,1], "+", vmat[,2])
+# we add the random intercepts, slopes and the combinations
+vr <- c(rint, rslopes, vr_tmp)
+
+# fixed factors
+vf <- c("Species * DiamClass * Class* T3")
+
+# prepare the dataframe removing the rows with NAs in our variables of interest
+full_prepared_tmp <- full_prepared[full_prepared %>% dplyr::select(RespCorrectedgrams, Species, DiamClass, Class) %>% complete.cases(),]
+
+# model without random factors
+simple <- gls(RespCorrectedgrams ~ Species + DiamClass + Class + T3,
+              method = "REML", data = full_prepared_tmp)
+
+# run all the models
+# rn <- vr[1]
+random_mod <- lapply(vr, function(rn){
+  form <- formula(paste0("RespCorrectedgrams~", vf, "+",rn))
+  mod_rn <- tryCatch(lmer(form, data = full_prepared_tmp), error = function(e) NA)
+})
+
+# AIC of the random models
+AIC_rs <- ldply(random_mod, function(mod) tryCatch(AIC(mod),error = function(e) NA))
+AIC_rs <- data.frame(vr, AIC=AIC_rs)
+
+# paste the AIC of the model without any random factors for comparison
+AIC_simple <- data.frame(vr = "", V1 = AIC(simple))
+AIC_rs <- rbind(AIC_simple, AIC_rs)
+View(AIC_rs)
+selected_random <- AIC_rs[which(AIC_rs[,2] == min(AIC_rs[,2], na.rm = T )),]
+# however this model is overly complex. When we fit it the matrix is singular
+# so I select the model with the lowest AIC that is not overly complex --> model 4
+
+# fixed variable selection
+library(MuMIn)
+
+full_form <- formula(paste0("RespCorrectedgrams~", vf))
+full_mod <- lme(full_form, random = ~ 1 | Plot...16, data = full_prepared_tmp)
+# model selection
+res <- dredge(full_mod, trace=2)
+
+# variable importance
+importance(res)
+selected_mod <- get.models(res, subset = 1, method = "REML")[[1]]
+piecewiseSEM::rsquared(selected_mod)
+
+# install.packages("coefplot2",
+#                  repos="http://www.math.mcmaster.ca/bolker/R",
+#                  type="source")
+
+# results graph
+library(coefplot2)
+coefplot2(selected_mod)
+
+# since the graph above is a little uggly we made our own7
+ff <- fortify(coeftab(selected_mod))
+ff$pnames <- rownames(ff)
+colnames(ff) <- c("Estimate", "Std.Error","y2", "y25","y75","y97","pnames")
+ggplot() + 
+  geom_pointrange(data=ff, mapping=aes(x=pnames, y=Estimate, ymin=y2, ymax=y97),
+                  size=1, color="blue", fill="white", shape=22) +
+  geom_hline(yintercept = 0, linetype = 3) +
+  theme_bw(base_size = 12) # this is a nice theme + selection of letter size
+
+
+
 ################### BARPLOT ##########################
 
 j <- prueba
@@ -424,7 +516,7 @@ library(ggpubr)
 plots <- lapply(list1, function(x) ggplot(x, aes(T3, RespCorrectedArea,color = Class)) + 
                   temascatter +
                   geom_point(aes(color = Class),size=1) +
-                  labs(y=expression("g CO"[2]*" min"^-1*"m"^2),x="Temperature ºC")+
+                  labs(y=expression("g CO"[2]*" min"^-1*"m"^2),x="Temperature ?C")+
                   geom_smooth(method='lm')+
                   facet_wrap(~Class)+
                   stat_regline_equation(aes(label = ..rr.label..)))
@@ -432,7 +524,7 @@ plots
 plots <- lapply(list1, function(x) ggplot(x, aes(T3, RespCorrectedVolume,color = Class)) + 
                   temascatter +
                   geom_point(aes(color = Class),size=1) +
-                  labs(y=expression("g CO"[2]*" min"^-1*"m"^-3),x="Temperature ºC")+
+                  labs(y=expression("g CO"[2]*" min"^-1*"m"^-3),x="Temperature ?C")+
                   geom_smooth(method='lm')+
                   facet_wrap(~Class)+
                   stat_regline_equation(aes(label = ..rr.label..)))
@@ -440,7 +532,7 @@ plots <- lapply(list1, function(x) ggplot(x, aes(T3, RespCorrectedVolume,color =
 plots <- lapply(list1, function(x) ggplot(x, aes(T3, RespCorrectedgrams,color = Class)) + 
                   temascatter +
                   geom_point(aes(color = Class),size=1) +
-                  labs(y=expression(mu*"M CO"[2]* "min"-1*" g DW"^-1),x="Temperature ºC")+
+                  labs(y=expression(mu*"M CO"[2]* "min"-1*" g DW"^-1),x="Temperature ?C")+
                   geom_smooth(method='lm')+
                   facet_wrap(~Class)+
                   stat_regline_equation(aes(label = ..rr.label..)))
