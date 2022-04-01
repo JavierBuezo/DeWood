@@ -105,8 +105,9 @@ j$RespCorrectedArea <- j$RespCorrectedArea *10000*0.000044 * 60
 j$RespCorrectedVolume <- j$RespCorrectedVolume *1000000*0.000044*60
 
 
-#Con este calculo pasamos los uM CO2, gr ,S a: ug CO2, gr DW, minuto
-j$RespCorrectedgrams <- j$RespCorrectedgrams *0.000044*60 * 1000000
+#Con este calculo pasamos los uM CO2, gr ,S a: ug CO2, gr DW, minuto En la version con densidades definitiva esta respiración ya viene corregida
+#Disponible en resp_g_kg_day
+# j$RespCorrectedgrams <- j$RespCorrectedgrams *0.000044*60 * 1000000
 
 prueba <- na.omit(j) %>% group_by(type2) %>% 
   summarise_each(funs(mean,sd,n=n()))
