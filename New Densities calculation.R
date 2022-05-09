@@ -1,5 +1,14 @@
 library(openxlsx)
 library(stringr)
+
+
+path.to.data  <- "C:/Users/Javier/Documents/DeWood Git/DeWood/Files/"
+setwd(path.to.data)
+
+path.to.data  <- "C:/Users/Javier/Documents/DeWood Git/DeWood/Files/"
+
+
+
 library(data.table)
 library(dplyr)
 library(tidyr)
@@ -10,9 +19,6 @@ path.to.data  <- "C:/Users/Javier/Documents/DeWood Git/DeWood/Files/Final result
 path.to.data  <- "C:/Users/javie/Documents/DeWood GitHub/DeWood/Files/Final results/CSV"
 setwd(path.to.data)
 
-
-
-  
 field_table <- read.xlsx("Table field final.xlsx")
 density_table <- fread("Density_table.csv")
 colnames(density_table)[1] <- "LABEL"
@@ -39,6 +45,7 @@ all_table <- all_table %>% drop_na(SubPlot)
 
 
 all_table <- all_table %>% mutate(sample_length =case_when(
+
   DiamClass=="01" ~ "10",
   DiamClass=="10" ~ "5",
   DiamClass=="25" ~ "5"
@@ -50,13 +57,13 @@ all_table$meanradius <- ((all_table$`D1.(cm)`+all_table$`D2.(cm)`+all_table$`D3.
 all_table$samplevolume <- pi * (all_table$meanradius^2) * all_table$sample_length
 all_table$sample_density <- (all_table$`DW.(g)`/all_table$samplevolume) * 1000
 
+
 all_table$type <- paste(all_table$Species,all_table$DiamClass,all_table$Class,sep="")
 
 
 library(plyr)
 impute.mean <- function(x) replace(x, is.na(x), mean(x, na.rm = TRUE))
 dat2 <- ddply(all_table, ~ type, transform, sample_density = impute.mean(sample_density))
-
 
 
 
@@ -77,6 +84,12 @@ dat2 <- ddply(all_table, ~ type, transform, sample_density = impute.mean(sample_
 # j <- all_table_25cm
 # j<- filter(full_prepared,full_prepared$respiration>=0)
 
+j$type <- paste(j$Species,j$DiamClass)
+j$Class <- as.character(j$Class)
+
+list1 <- split(all_table,all_table$Species)
+
+
 
 # j$type <- paste(j$Species,j$DiamClass)
 # j$Class <- as.character(j$Class)
@@ -84,11 +97,40 @@ dat2 <- ddply(all_table, ~ type, transform, sample_density = impute.mean(sample_
 # list1 <- split(all_table,all_table$Species)
 
 
+
 temascatter <- theme(plot.title = element_text(family = "Helvetica", face = "bold", size = (15)), 
                      legend.title = element_text(colour = "steelblue",  face = "bold.italic", family = "Helvetica"), 
                      legend.text = element_text(face = "italic", colour="steelblue4",family = "Helvetica"), 
                      axis.title = element_text(family = "Helvetica", size = (10), colour = "steelblue4"),
                      axis.text = element_text(family = "Courier", colour = "cornflowerblue", size = (10)))
+
+ggplot(all_table,aes(Class,sample_density,color=Class))+
+      geom_point()+
+      facet_wrap(~DiamClass+Species,scales="free",ncol=2)
+#ORDERFACTOR
+
+
+plots <- lapply(j, function(x) ggplot(x, aes(DiamClass, sample_density,color =Class)) + 
+                  temascatter +
+                  geom_point(aes(color = Class),size=1))+
+                  
+            
+                  
+plots
+plot <- ggplot(all_table, aes(DiamClass,sample_density, color=Species)) + 
+  temascatter +
+  geom_point(aes(color = Class),size=1) +
+  geom_abline(slope = 1,intercept = 0)
+  # facet_wrap(~DiamClass)
+  # geom_smooth(method="lm")
+  # labs(y=expression("g CO"[2]*" min"^-1*"m"^2),x="Temperature ?C")+
+  # geom_smooth(method='lm')+
+  # facet_wrap(~Class)+
+  # stat_regline_equation(aes(label = ..rr.label..))
+plots
+
+  
+field_table$density <- pi * field_table$`D1.(cm)`                          
 
 
 
@@ -139,4 +181,5 @@ filtrado %>%
   # geom_bar(stat = "summary",fun="mean")+
   # geom_errorbar(stat= "summary", fun="mean_se")+
   facet_wrap(~DiamClass+Species,scales="free",ncol=2)
+
 
