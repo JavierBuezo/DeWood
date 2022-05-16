@@ -11,7 +11,8 @@ library(data.table)
 path.to.data <- "C:/Users/javie/OneDrive - UPNA/DeWood Project/Respiration Campaign December/EGM_2/Joint/"
 path.to.data <- "C:/Users/javie/OneDrive - UPNA/DeWood Project/Respiration Campaign 09 September/"
 path.to.data <- "D:/OneDrive - UPNA/DeWood Project/Respiration Campaign October 2021/EGM_2/Joint/"
-#path.to.data <- "C:/Users/NG.5027073/Dropbox (MNCN CSIC)/práce/Nagore uam/INVESTIGACION/2020 - DeWood Romania/EGM 4/"
+path.to.data <- "C:/Users/Javier/Documents/DeWood Git/DeWood/Files/Respiration Campaing April 2022/EGM_2/Joint"
+#path.to.data <- "C:/Users/NG.5027073/Dropbox (MNCN CSIC)/pr?ce/Nagore uam/INVESTIGACION/2020 - DeWood Romania/EGM 4/"
 #Leemos el excell con los codigos de plot y muestra, separados por fecha
 setwd(path.to.data)
 
@@ -38,10 +39,10 @@ lapply(files_nm, function(y){
                                                              condition = ~ .x == "M5")
           TablatempnoR5 <- TablatempnoM5 %>% replace_with_na_at(.vars = c("sample_code", "marcastart"), 
                                                                 condition = ~ .x == "R5")
-          #Rellenamos las filas que ahora son NA con el valor de encima. De esta manera si la fila forma parte de una medida tendrá "Start", esto será lo que usemos como filtro.
+          #Rellenamos las filas que ahora son NA con el valor de encima. De esta manera si la fila forma parte de una medida tendr? "Start", esto ser? lo que usemos como filtro.
           resultados <- TablatempnoR5 %>% fill(marcastart)
           
-          #Empezamos la regresión como en el EGM-4. Creando un ID único.
+          #Empezamos la regresi?n como en el EGM-4. Creando un ID ?nico.
           resultados$ID <- paste(resultados$egmplotcode, resultados$sample_code, resultados$Month, resultados$Day, sep = "_")
           vct <- unique(resultados$ID)
           if(!"Sample_code1" %in% colnames(resultados)){
@@ -54,14 +55,14 @@ lapply(files_nm, function(y){
           #Comenzamos el ciclo
           regresioneslineales <- lapply(vct[-2], function(x) {
             tmp <- resultados[resultados$ID == x,]  #Se filtra aquellas filas que coincidan con el ID
-            tmp2 <- tmp[tmp$marcastart == "Start",] #Hay que hacer un filtrado más, en el que además la columna marcastart ha de ser Start
+            tmp2 <- tmp[tmp$marcastart == "Start",] #Hay que hacer un filtrado m?s, en el que adem?s la columna marcastart ha de ser Start
             
             #En caso de que la fila solo termine con NA
             tmp2[is.na(tmp2)] <- 0
             
             # tmp2$'CO2.Ref' <- df$'CO2.Ref'*!c(FALSE,diff(tmp2$'CO2.Ref',lag=1)<0),
             # tmp2 %>% mutate('CO2.Ref' = ifelse('CO2.Ref' < lag('CO2.Ref,')))
-            #Añadir un IF en caso de que haya un código sin medidas. Le dará robustez para el futuro sin preocuparme de ojear el archivo a mano
+            #A?adir un IF en caso de que haya un c?digo sin medidas. Le dar? robustez para el futuro sin preocuparme de ojear el archivo a mano
             if(nrow(tmp2) != 0)
               { 
               
@@ -76,7 +77,7 @@ lapply(files_nm, function(y){
               Sample_code1 <- tmp2$Sample_code1[1]
               Sample_code2 <- tmp2$Sample_code2[1]
      
-                # guardar un gráfico en el ordenador si r cuadrado está por debajo de 0.8
+                # guardar un gr?fico en el ordenador si r cuadrado est? por debajo de 0.8
                 if(rsq < 0.8) {
                   ggplot(tmp2,aes(x = RecNo, y =`CO2.Ref`)) +
                     geom_point() +
@@ -97,7 +98,7 @@ lapply(files_nm, function(y){
           reg_mat <- bind_rows(regresioneslineales)
             
 
-            #Guardamos el archivo como un CSV para poder usarlo en la función. n.
+            #Guardamos el archivo como un CSV para poder usarlo en la funci?n. n.
 
             
             write.csv(reg_mat,paste(substr(y,1,nchar(y)-5),"result.csv"))

@@ -16,6 +16,7 @@ library(stringi)
 path.to.data <- "C:/Users/javie/OneDrive - UPNA/DeWood Project/Respiration Campaign December/EGM_2/"
 path.to.data <- "C:/Users/javie/OneDrive - UPNA/DeWood Project/Respiration Campaign 09 September/"
 path.to.data <- "D:/OneDrive - UPNA/DeWood Project/Respiration Campaign October 2021/EGM_2/"
+path.to.data <- "C:/Users/Javier/Documents/DeWood Git/DeWood/Files/Respiration Campaing April 2022/EGM_2/"
 
 
 #path.to.data <- "C:/Users/NG.5027073/Dropbox (MNCN CSIC)/pr?ce/Nagore uam/INVESTIGACION/2020 - DeWood Romania/EGM 4/"
@@ -34,7 +35,7 @@ lapply(files_nm, function(x){
 
 #El formato ha de ser DD_MM_YY
   # codigosplot <-read_excel("Codes/Codes_July_2021.xlsx",substr(x,1,8))
-  codigosplot <-read_excel("Codes/Codes_December_2021.xlsx",substr(x,1,8))
+  codigosplot <-read_excel("Codes/Codes_April_2022.xlsx",substr(x,1,8))
 colnames(codigosplot)[3] <-"egmplotcode"
 colnames(codigosplot)[2] <-"sample_code"
 
