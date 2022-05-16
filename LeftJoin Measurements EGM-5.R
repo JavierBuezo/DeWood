@@ -12,6 +12,7 @@ library(fs)
 library(openxlsx)
 library(tidyr)
 library(stringi)
+library(lubridate)
 
 path.to.data <- "C:/Users/javie/OneDrive - UPNA/DeWood Project/Respiration Campaign December/EGM_2/"
 path.to.data <- "C:/Users/javie/OneDrive - UPNA/DeWood Project/Respiration Campaign 09 September/"
@@ -59,6 +60,9 @@ colnames(measurements)[14]<-"PAR"
 colnames(measurements)[15]<-"Tsoil"
 colnames(measurements)[16]<-"Tair"
 colnames(measurements)[17]<-"RH"
+
+measurements$time <-  format(measurements$time,format = "%H:%M:%S")
+
 # nchar(measurements$date[1])
 # nchar(measurements$date[1]) == 10
 #Separamos dia, mes, hora y minuto en columnas nombradas para que puedan ser usadas en la funcion de regresi?n lineal 
@@ -68,8 +72,8 @@ colnames(measurements)[17]<-"RH"
 #   vecMonth <- substring(measurements$date,6,7)
 # }
 # else{ #si no dd/mm/yy
-  vecDay <- substring(measurements$date,1,2)
-  vecMonth <- substring(measurements$date,4,5)
+  vecDay <- substring(measurements$date,9,10)
+  vecMonth <- substring(measurements$date,6,7)
 # }
 
 #Lo mismo pasa con el formato de la hora, a veces el EGM toma el dato como hh/mm/ss y en otras a?ade a la izquierda n?meros que no entiendo (19 caracteres totales)
