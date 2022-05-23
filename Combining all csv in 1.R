@@ -8,13 +8,14 @@ library(tidyr)
 library(stringi)
 library(readr)
 
-path.to.data <- "C:/Users/javie/OneDrive - UPNA/DeWood Project/Final results/"
+path.to.data <- "C:/Users/javie/OneDrive - UPNA/DeWood Project/Final results/CSV/Old/"
 path.to.data <- "C:/Users/javie/OneDrive - UPNA/DeWood Project/Respiration Campaign 09 September/"
-#path.to.data <- "C:/Users/NG.5027073/Dropbox (MNCN CSIC)/práce/Nagore uam/INVESTIGACION/2020 - DeWood Romania/EGM 4/"
+path.to.data <- "C:/Users/Javier/Documents/DeWood Git/DeWood/Files/Final results/CSV/Old/"
+#path.to.data <- "C:/Users/NG.5027073/Dropbox (MNCN CSIC)/pr?ce/Nagore uam/INVESTIGACION/2020 - DeWood Romania/EGM 4/"
 #Leemos el excell con los codigos de plot y muestra, separados por fecha
 setwd(path.to.data)
 
-setwd("D:/OneDrive - UPNA/DeWood Project/Respiration Campaign July 2021/Results CSV")
+
 path.to.data <- getwd()
 
 #Cargar todos los archivos xlsx de la carpeta

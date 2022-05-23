@@ -21,11 +21,11 @@ files_path <- list.files(path.to.data, full.names = T, pattern = ".xlsx")
 #Guardar el nombre del archivo para usarlo despues como titulo
 files_nm <- list.files(path.to.data, pattern = ".csv")
 
-
+# y <- files_nm[1]
 
 lapply(files_nm, function(y){
           message(paste("Abriendo", y))
-          Tablafinal <- read.csv(y)
+          Tablafinal <- fread(y)
           
           #Empezamos a formatear la tabla para realizar el ciclo de regresiones. Hace falta una columna que marque las medidas que forman parte de la recta.
           #Creamos una columna auxiliar
@@ -51,7 +51,7 @@ lapply(files_nm, function(y){
           if(!"Sample_code2" %in% colnames(resultados)){
             resultados$Sample_code2 <- NA
           }
-
+# x <- vct[1]
           #Comenzamos el ciclo
           regresioneslineales <- lapply(vct[-2], function(x) {
             tmp <- resultados[resultados$ID == x,]  #Se filtra aquellas filas que coincidan con el ID
@@ -66,9 +66,9 @@ lapply(files_nm, function(y){
             if(nrow(tmp2) != 0)
               { 
               
-              lm <- lm(tmp2$`CO2.Ref` ~ tmp2$RecNo)
+              lm <- lm(tmp2$`CO2 Ref` ~ tmp2$RecNo)
                 rsq <- broom::glance(lm)$r.squared
-               slope <- broom::tidy(lm(tmp2$`CO2.Ref` ~ tmp2$RecNo))$estimate[2]
+               slope <- broom::tidy(lm(tmp2$`CO2 Ref` ~ tmp2$RecNo))$estimate[2]
                Month <- tmp2$Month[1]
                Day <- tmp2$Day[1]
                Hour <- tmp2$Hour[1]
@@ -79,7 +79,7 @@ lapply(files_nm, function(y){
      
                 # guardar un gr?fico en el ordenador si r cuadrado est? por debajo de 0.8
                 if(rsq < 0.8) {
-                  ggplot(tmp2,aes(x = RecNo, y =`CO2.Ref`)) +
+                  ggplot(tmp2,aes(x = RecNo, y =`CO2 Ref`)) +
                     geom_point() +
                     geom_smooth(method='lm', formula= y~x) +
                     ggtitle(x) +

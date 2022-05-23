@@ -8,7 +8,7 @@ path.to.data <- "C:/Users/javie/OneDrive - UPNA/DeWood Project/Respiration Campa
 path.to.data <- "C:/Users/Javier/Documents/DeWood Git/DeWood/Files/Respiration Campaing April 2022/EGM_1/27_04_2022"
 setwd(path.to.data)
 dir()
-enterdata<- "29_04_2022"
+enterdata<- "27_04_2022"
 path.to.data <- paste("C:/Users/Javier/Documents/DeWood Git/DeWood/Files/Respiration Campaing April 2022/EGM_1/",enterdata,sep="")
 setwd(path.to.data)
 #################
