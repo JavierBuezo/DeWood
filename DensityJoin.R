@@ -16,6 +16,7 @@ hexToText <- function(msg){
 
 
 path.to.data <- "C:/Users/javie/OneDrive - UPNA/DeWood Project/Final results/CSV/"
+path.to.data <- "C:/Users/Javier/Documents/DeWood Git/DeWood/Files/Final results/CSV"
 #Cargar todos los archivoscsv de la carpeta
 files_path <- list.files(path.to.data, full.names = T, pattern = ".csv")
 #Guardar el nombre del archivo para usarlo despues como titulo

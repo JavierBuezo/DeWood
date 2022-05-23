@@ -6,9 +6,9 @@ library(readxl) # 1
 path.to.data <- "C:/Users/javie/OneDrive - UPNA/DeWood Project/Respiration Campaign December/EGM_1"
 path.to.data <- "D:/OneDrive - UPNA/DeWood Project/Respiration Campaign July 2021/EGM_1"
 path.to.data <- "D:/OneDrive - UPNA/DeWood Project/Respiration Campaign October 2021/EGM_1"
+path.to.data <- "C:/Users/Javier/Documents/DeWood Git/DeWood/Files/Respiration Campaing April 2022/EGM_1/"
 
-
-#path.to.data <- "C:/Users/NG.5027073/Dropbox (MNCN CSIC)/práce/Nagore uam/INVESTIGACION/2020 - DeWood Romania/EGM 4/"
+#path.to.data <- "C:/Users/NG.5027073/Dropbox (MNCN CSIC)/pr?ce/Nagore uam/INVESTIGACION/2020 - DeWood Romania/EGM 4/"
 
 setwd(path.to.data)
 #Cargar todos los archivos xlsx de la carpeta
@@ -41,13 +41,13 @@ lapply(files_nm, function(y){
       Day <- tmp$Day[1]
       Hour <- tmp$Hour[1]
       Min <- tmp$Min[1]
-      ATMP <- tmp$ATMP[1] *  (9.869 * 10^-4) #pasamos la presión a ATM
+      ATMP <- tmp$ATMP[1] *  (9.869 * 10^-4) #pasamos la presi?n a ATM
       #Formatear la tabla con Sample_code1 y Sample_code2 para que el formato sea el mismo que con los EGM_5. Y usar a partir de ahora los mismos
       #Sample_code1 se toma del ID y Samplecode2 se llena con NA.
       Sample_code1 <- gsub("[\\_\\_]", "", regmatches(tmp$ID[1], gregexpr("\\_.*?\\_", tmp$ID[1]))[[1]])
       Sample_code2 <- 0
   
-  # guardar un gráfico en el ordenador si r cuadrado está por debajo de 0.8
+  # guardar un gr?fico en el ordenador si r cuadrado est? por debajo de 0.8
      if(rsq < 0.8) {
         ggplot(tmp,aes(x = RecNo, y =`CO2 Ref`)) +
           geom_point() +
@@ -56,19 +56,19 @@ lapply(files_nm, function(y){
          theme_bw()
         ggsave(paste0(x, ".png")) 
         } else {paste0(x, " is ok")}
-      # guardar valores de pendiente , r cuadrado, día, hora y minuto
+      # guardar valores de pendiente , r cuadrado, d?a, hora y minuto
      save <- data.frame(ID = x ,slope, rsq,Month,Day,Hour,Min,Sample_code1,Sample_code2,ATMP)
   
 })
 
 reg_mat <- bind_rows(regresioneslineales)
 
-# pegar los resultados en la tabla original para tener las columnas de identificación de los datos
-# guardamos los datos que tienen ID distinto y la hora el mintuo etc del primer dato así sabemos a qué hora se tomo
+# pegar los resultados en la tabla original para tener las columnas de identificaci?n de los datos
+# guardamos los datos que tienen ID distinto y la hora el mintuo etc del primer dato as? sabemos a qu? hora se tomo
 # esto por si luego lo vamos a asociar con datos de registradoes de humedad temperatura etc.
 # id_data <- distinct(resultados[,c("ID", "egmplotcode", "sample_code","Day", "Month", "Hour", "Min")], ID, egmplotcode, .keep_all = TRUE)
 # left_join(reg_mat, id_data , by = "ID")
-# guardar los resultados. Ten cuenta que los gardará en la carpeta que hayas definido como working directory 
+# guardar los resultados. Ten cuenta que los gardar? en la carpeta que hayas definido como working directory 
 # con la funcion setwd
 write.csv(reg_mat, paste(y,"result.csv"))
 }

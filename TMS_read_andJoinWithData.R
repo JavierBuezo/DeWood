@@ -34,13 +34,14 @@ TimeCorrectionTMS <- 1 * 60 * 60 #The Time correction must be in seconds
 #Read the excel with the Plots vs TMS codes 
 path.to.data <- "C:/Users/javie/OneDrive - UPNA/DeWood Project/"
 path.to.data <- "D:/OneDrive - UPNA/DeWood Project"
+path.to.data <- "C:/Users/Javier/Documents/DeWood Git/DeWood/Files"
 setwd(path.to.data)
 
 #Load all the files with the TMS measurements and format the columns.
 sensores_path <- paste(getwd(),"/TMS4/All days with plots/",sep = "") #TMS July
 sensores_path <- paste(getwd(),"/Respiration Campaign October 2021/TMS4/All days with plots/",sep = "")
 sensores_path <- paste(getwd(),"/Respiration Campaign December/TMS4/All days with plots/",sep = "")
-
+sensores_path <- paste(getwd(),"/Respiration Campaing April 2022/TMS4/All days with plots/",sep = "")
 setwd(sensores_path)
 files_nm <- list.files(sensores_path, pattern = ".csv")
 temp <- lapply(files_nm,function (x){
@@ -74,6 +75,8 @@ datos_path2 <- paste(getwd(),"/Respiration Campaign October 2021/EGM_2/LM Result
 datos_path1 <- paste(getwd(),"/Respiration Campaign December/EGM_1/LM Results/Joined With Field Table/",sep = "")
 datos_path2 <- paste(getwd(),"/Respiration Campaign December/EGM_2/LM Results/Joined With Field Table/",sep = "")
 
+datos_path1 <- paste(getwd(),"/Respiration Campaing April 2022/EGM_1/LM Results/Joined With Field Table/",sep = "")
+datos_path2 <- paste(getwd(),"/Respiration Campaing April 2022/EGM_2/LM Results/Joined With Field Table/",sep = "")
 setwd(datos_path1)
 files_nm1 <- list.files(datos_path1, pattern = ".csv")
 datos1 <- lapply(files_nm1,fread)
@@ -89,7 +92,7 @@ tabla_datos2 <- rbindlist(datos2, fill = TRUE)
 tabla_datos <- rbind(tabladatos1,tabla_datos2)
 
 #Set the year
-year <- "2021"
+year <- "2022"
 
 #Create Date Time column to be able to parse it in the future
 tabla_datos$Date <- paste(year,tabla_datos$Month,tabla_datos$Day, sep = "-")
@@ -127,10 +130,10 @@ lectura_sensores$DateTime <- lectura_sensores$DateTime + TimeCorrectionTMS
 ########################### The search for the closest time can take long with too many data. The measurements from the TMS must be filtered before##########################
 
 # establecer la fecha de comienzo de toma de datos
-startdate <- "2021-07-26 23:59:59"
+startdate <- "2022-04-26 23:59:59"
 startdate <-lubridate::ymd_hms(startdate)
 
-enddate <- "2021-07-30 23:59:59"
+enddate <- "2022-04-30 23:59:59"
 enddate <- lubridate::ymd_hms(enddate)
 # lectura_sensores$DateTime <- ymd_hm(lectura_sensores$DateTime)
 lectura_sensores$DateTime <- lubridate::ymd_hms(lectura_sensores$DateTime) 
@@ -190,15 +193,17 @@ sp
 ########################### Joining the data of respiration with the temperatures #########################################3
 
 lectura_sensores <- filter(lectura_sensores, DateTime > startdate, DateTime < enddate)
-
+x <- vct[1]
 reg_mat <- lapply(vct, function (x){
+
   datos_filtered <- tabla_datos[tabla_datos$Loc == x,]
   lectura_filtered <- lectura_sensores[lectura_sensores$Loc == x,]
   print(x)
+  
   save <- nearestTime(datos_filtered,lectura_filtered,"DateTime","DateTime")
   
 })
-
+buscando <- filter (lectura_sensores,lectura_sensores$Plot == "1")
 resultadofinal <- bind_rows(reg_mat)
 ########################################Set the variables of chamber volumes, discs, etc.... 
 
@@ -261,7 +266,7 @@ resultadofinal %>% group_by(DiamClass) %>%
                list(name=mean))
 
 #Write the result. Watch the name, this script is for the measurement of each campaign. 
-write.csv(resultadofinal,"RESULTADOFINALJulio.csv")
+write.csv(resultadofinal,"RESULTADOFINALAbril.csv")
 getwd()
 
 

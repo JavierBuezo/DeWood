@@ -8,15 +8,16 @@ library(naniar)
 
 path.to.data <- "C:/Users/javie/OneDrive - UPNA/DeWood Project/"
 path.to.data <- "D:/OneDrive - UPNA/DeWood Project"
+path.to.data <- "C:/Users/Javier/Documents/DeWood Git/DeWood/Files"
 
 
-#path.to.data <- "C:/Users/NG.5027073/Dropbox (MNCN CSIC)/práce/Nagore uam/INVESTIGACION/2020 - DeWood Romania/EGM 4/"
+#path.to.data <- "C:/Users/NG.5027073/Dropbox (MNCN CSIC)/pr?ce/Nagore uam/INVESTIGACION/2020 - DeWood Romania/EGM 4/"
 #Leemos el excell con los codigos de plot y muestra, separados por fecha
 setwd(path.to.data)
 
 Table_Field <- read_xlsx("Table field final.xlsx")
 
-#Eliminar los espacios de los códigos si los hubiera y cambiar los 1 por 01 para que sea facil de extraer
+#Eliminar los espacios de los c?digos si los hubiera y cambiar los 1 por 01 para que sea facil de extraer
 Table_Field$Code <- str_remove_all(Table_Field$Code,pattern = " ")
 Table_Field$Code <- str_replace_all(Table_Field$Code,pattern = "1-",replacement = "01-")
 
@@ -28,8 +29,8 @@ Table_Field$Class <- substr(Table_Field$Code,9,9)
 Table_Field$Species <- substr(Table_Field$Code,10,11)
 colnames(Table_Field)[1] <-"sample_code"
 
-archivos <- paste(getwd(),"/Respiration Campaign December/EGM_2/LM Results/",sep = "")
-archivos <- paste(getwd(),"/Respiration Campaign December/EGM_1/LM Results/",sep = "")
+archivos <- paste(getwd(),"/Respiration Campaing April 2022/EGM_2/LM Results/",sep = "")
+archivos <- paste(getwd(),"/Respiration Campaing April 2022/EGM_1/LM Results/",sep = "")
 
 # archivos <- paste(getwd(),"/Respiration Campaign October 2021/EGM_2/LM Results/",sep = "")
 # archivos <- paste(getwd(),"/Respiration Campaign October 2021/EGM_1/LM Results/",sep = "")
@@ -50,7 +51,7 @@ lapply(files_nm, function(x){
    
     sample1 <- TablaMedidas$Sample_code1[TablaMedidas$ID==y] 
     sample2 <- TablaMedidas$Sample_code2[TablaMedidas$ID==y]
-    #Transformar columnas a numérico porque R las coge como string
+    #Transformar columnas a num?rico porque R las coge como string
     Table_Field[,c("D1 (cm)","D2 (cm)","D3 (cm)", "D4 (cm)","Length (cm)")] <- sapply(Table_Field[,c("D1 (cm)","D2 (cm)","D3 (cm)", "D4 (cm)","Length (cm)")], as.numeric)
       medida <- Table_Field[Table_Field$sample_code == sample1,]
 
@@ -102,8 +103,8 @@ lapply(files_nm, function(x){
     mergeado <- merge(medida,datos)
         
   })
-  reg_mat<-bind_rows(joinmanual) #no termino de entender cómo funciona esto ni por qué, sé que funciona. Preguntar a Nagore
-  reg_mat[paste("...",14:29,sep = "")] <- NULL # De los excells quedan columnas vacías. Eliminarlas
+  reg_mat<-bind_rows(joinmanual) #no termino de entender c?mo funciona esto ni por qu?, s? que funciona. Preguntar a Nagore
+  reg_mat[paste("...",14:29,sep = "")] <- NULL # De los excells quedan columnas vac?as. Eliminarlas
   reg_mat$slope[reg_mat$slope < 0.03] <- 0 #Los valores menores que 0.03 se consideran 0. 
   names(reg_mat) <- gsub("\\ ", "", names(reg_mat)) #Eliminar los espacios en los nombres de columna
   write.csv(reg_mat,paste(x,"JoinWithFieldTable.csv",sep = ""))
