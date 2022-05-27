@@ -27,8 +27,6 @@ listresp <- split(prueba, prueba$sample_code_combined)
 
 
 
-
-
 Q10_all <- lapply(listresp, function(x){
   
   toptemp <- x[which.max(x$T3),]
@@ -56,6 +54,7 @@ q10distinct3 <- filter(q10distinct3,q10distinct3$Q10 != 0)
 ###Also delete the replicated rows the 1 cm have
 q10distinct4 <- q10distinct3[!duplicated(q10distinct3$sample_code_combined),]
 
+q10distinct4 <- q10distinct4[!q10distinct4$sample_code_combined=="595+598",]
 install.packages("EnvStats")
 library("EnvStats")
 ggplot(na.omit(q10distinct4),aes(x=Class,y=Q10,color=Class))+
