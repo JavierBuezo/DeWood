@@ -11,11 +11,8 @@ setwd(path.to.data)
 densities <- fread("Field_tableW_New_Densities.csv")
 
 onlydensities <- densities[,c("sample_code","sample_density")]
-# 
-# duplicated_names <- duplicated(colnames(alldata))
-# uniquenames <- unique(colnames(alldata))
-# alldata[uniquenames]
-# alldata[!duplicated_names]
+
+
 
 all <- left_join(alldata,onlydensities,"sample_code")
 
@@ -34,20 +31,29 @@ all$RespCorrectedVolume_grCO2_M3_min <- all$RespCorrectedVolumeuMCm3 * 1000000*0
 
 
 #Con este calculo pasamos los uM CO2, gr ,S a: uM CO2, gr, minuto
-all$RespCorrectedWeight_GrCO2_Gr_min <- all$RespCorrectedWeightuMgr*0.000044*60 * 1000000
+all$RespCorrectedWeight_GrCO2_KGr_Year <- all$RespCorrectedWeightuMgr*0.000044*60*24*365*1000
 all$Class <- as.character(all$Class)
 
 filteredR <- filter(all,rsq > 0.8)
-ggplot(filteredR,aes(x=T3, y=RespCorrectedWeight_GrCO2_Gr_min,color=Class))+
+
+#LINEAR
+ggplot(filteredR,aes(x=T3, y=RespCorrectedWeight_GrCO2_KGr_Year,color=Class))+
   geom_point(size=1)+
   geom_smooth(method = "lm")+
   stat_regline_equation(aes(label=..rr.label..))+
-  labs(y=expression("g CO"[2]*" min"^-1*"g DW"^-1),x="Temperature ºC")+
+  labs(y=expression("g CO"[2]*" Year"^-1*"Kg DW"^-1),x="Temperature ºC")+
+  facet_wrap(~Species+DiamClass,scales="free")
+#Quadratic
+ggplot(filteredR,aes(x=T3, y=RespCorrectedWeight_GrCO2_KGr_Year,color=Class))+
+  geom_point(size=1)+
+  geom_smooth(method = "lm",formula = y ~ x + I(x^2))+
+  stat_regline_equation(formula=y ~ x + I(x^2),aes(label=..rr.label..))+
+  labs(y=expression("g CO"[2]*" Year"^-1*"Kg DW"^-1),x="Temperature ºC")+
   facet_wrap(~Species+DiamClass,scales="free")
 
-ggplot(filteredR,aes(x=Class,y=RespCorrectedWeight_GrCO2_Gr_min,color=Class))+
+ggplot(filteredR,aes(x=Class,y=RespCorrectedWeight_GrCO2_KGr_Year,color=Class))+
   geom_boxplot()+
-  labs(X="Class",y=expression("g CO"[2]*" min"^-1*"g DW"^-1))+
+  labs(X="Class",y=expression("g CO"[2]*" Year"^-1*"Kg DW"^-1))+
   facet_wrap(~Species+DiamClass,scales="free")
 
 
@@ -55,8 +61,9 @@ all <- transform(all,auxmin = pmin(Sample_code1,Sample_code2))
 all <- transform(all,auxmax = pmax(Sample_code1,Sample_code2))
 all$sample_code_combined <- paste(all$auxmin,"+",all$auxmax,sep = "")
 measurementcode <- unique(all$sample_code_combined)
+all$auxmax <- NULL
 all$auxmin <- NULL
 
-all[all$sample_code_combined=="90+91"]
+
 write.csv(all,"AllYearMeasurementsWDensity.csv",row.names = FALSE)
 getwd()
