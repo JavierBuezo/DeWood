@@ -181,9 +181,9 @@ tms6_4 <- filter(tmsWCavg, tmsWCavg$Loc=="6_4")
 
 WC6_4united <- left_join(teros6_4,tms6_4,by="time")
 daysfreeze6_4 <- filter(tmsavg,tmsavg$T3 < 0 & tmsavg$Loc =="6_4")
-daysfreeze6_4.list <- unique(daysfreeze$time)
+daysfreeze6_4.list <- unique(daysfreeze6_4$time)
 
-WCnotfrozen6_4 <- WC6_4united[WC6_4united$time %in% daysfreeze.list,]
+WCnotfrozen6_4 <- WC6_4united[WC6_4united$time %in% daysfreeze6_4.list,]
 
 terostemp6_4 <- filter(terostempavg,terostempavg$loc=="6_4")
 tmstemp6_4 <- filter(tmsavg,tmsavg$Loc=="6_4")
@@ -213,9 +213,9 @@ tms1_5 <- filter(tmsWCavg, tmsWCavg$Loc=="1_5")
 
 WC1_5united <- left_join(teros1_5,tms1_5,by="time")
 daysfreeze1_5 <- filter(tmsavg,tmsavg$T3 < 0 & tmsavg$Loc =="1_5")
-daysfreeze1_5.list <- unique(daysfreeze$time)
+daysfreeze1_5.list <- unique(daysfreeze1_5$time)
 
-WCnotfrozen1_5 <- WC1_5united[WC1_5united$time %in% daysfreeze.list,]
+WCnotfrozen1_5 <- WC1_5united[WC1_5united$time %in% daysfreeze1_5.list,]
 
 terostemp1_5 <- filter(terostempavg,terostempavg$loc=="1_5")
 tmstemp1_5 <- filter(tmsavg,tmsavg$Loc=="1_5")
@@ -246,9 +246,9 @@ tms3_1 <- filter(tmsWCavg, tmsWCavg$Loc=="3_1")
 
 WC3_1united <- left_join(teros3_1,tms3_1,by="time")
 daysfreeze3_1 <- filter(tmsavg,tmsavg$T3 < 0 & tmsavg$Loc =="3_1")
-daysfreeze3_1.list <- unique(daysfreeze$time)
+daysfreeze3_1.list <- unique(daysfreeze3_1$time)
 
-WCnotfrozen3_1 <- WC3_1united[WC3_1united$time %in% daysfreeze.list,]
+WCnotfrozen3_1 <- WC3_1united[WC3_1united$time %in% daysfreeze3_1.list,]
 
 terostemp3_1 <- filter(terostempavg,terostempavg$loc=="3_1")
 tmstemp3_1 <- filter(tmsavg,tmsavg$Loc=="3_1")
@@ -264,6 +264,7 @@ WC3_1 <- ggplot(na.omit(WCnotfrozen3_1),aes(x=WC,y=Soil_moist,color=type))+
   stat_regline_equation(formula = y ~ log(x),aes(label=..rr.label..),position = "identity",label.y=0.32)
 WC3_1
 
+##FOR TEMP Linear adjustment is the most recomended###########
 tmp3_1 <- ggplot(na.omit(temp3_1united),aes(x=T3,y=temp,color=type))+
   ggtitle("Plot 3_1")+
   geom_point(size=1)+

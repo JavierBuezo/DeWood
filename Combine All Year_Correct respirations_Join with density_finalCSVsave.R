@@ -66,6 +66,17 @@ ggplot(filteredR,aes(x=T3, y=RespCorrectedWeight_GrCO2_KGr_Year,color=Class))+
   labs(y=expression("g CO"[2]*" Year"^-1*"Kg DW"^-1),x="Temperature ºC")+
   facet_wrap(~Species+DiamClass,scales="free")
 
+filteredR <- filteredR[!is.na(filteredR$RespCorrectedWeight_GrCO2_KGr_Year),]
+
+#Respiration Vs Soil moisture
+ggplot(filteredR,aes(x=Soil_moist, y=RespCorrectedWeight_GrCO2_KGr_Year,color=Class))+
+  geom_point(size=1)+
+  # stat_smooth(method = "lm",formula=y ~ x)+
+  # stat_regline_equation(formula=y ~ x,aes(label=..rr.label..))+
+  labs(y=expression("g CO"[2]*" Year"^-1*"Kg DW"^-1),x=expression("Soil Moisture M"^3*"M"^-3))+
+  facet_wrap(~Species+DiamClass,scales="free")
+
+
 ggplot(filteredR,aes(x=Class,y=RespCorrectedWeight_GrCO2_KGr_Year,color=Class))+
   geom_boxplot()+
   labs(X="Class",y=expression("g CO"[2]*" Year"^-1*"Kg DW"^-1))+

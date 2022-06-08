@@ -90,12 +90,12 @@ importance(res)
 selected_mod <- get.models(res, subset = 1, method = "REML")[[1]]
 piecewiseSEM::rsquared(selected_mod)
 
-install.packages("coefplot2",
-                 repos="http://www.math.mcmaster.ca/bolker/R",
-                 type="source")
-remotes::install_github("palday/coefplot2",
-                        subdir = "pkg")
-install.packages("coefplot2")
+# install.packages("coefplot2",
+#                  repos="http://www.math.mcmaster.ca/bolker/R",
+#                  type="source")
+# remotes::install_github("palday/coefplot2",
+#                         subdir = "pkg")
+# install.packages("coefplot2")
 # results graph
 library(coefplot2)
 coefplot2(selected_mod)
@@ -104,6 +104,7 @@ coefplot2(selected_mod)
 ff <- fortify(coeftab(selected_mod))
 ff$pnames <- rownames(ff)
 colnames(ff) <- c("Estimate", "Std.Error","y2", "y25","y75","y97","pnames")
+
 ggplot() + 
   geom_pointrange(data=ff, mapping=aes(x=pnames, y=Estimate, ymin=y2, ymax=y97),
                   size=1, color="blue", fill="white", shape=22) +
