@@ -50,6 +50,21 @@ ggplot(filteredR,aes(x=T3, y=RespCorrectedWeight_GrCO2_KGr_Year,color=Class))+
   stat_regline_equation(formula=y ~ x + I(x^2),aes(label=..rr.label..))+
   labs(y=expression("g CO"[2]*" Year"^-1*"Kg DW"^-1),x="Temperature ºC")+
   facet_wrap(~Species+DiamClass,scales="free")
+#Logaritmic
+ggplot(filteredR,aes(x=T3, y=RespCorrectedWeight_GrCO2_KGr_Year,color=Class))+
+  geom_point(size=1)+
+  geom_smooth(method = "lm",formula = y ~ log(x))+
+  stat_regline_equation(formula=y ~ log(x),aes(label=..rr.label..))+
+  labs(y=expression("g CO"[2]*" Year"^-1*"Kg DW"^-1),x="Temperature ºC")+
+  facet_wrap(~Species+DiamClass,scales="free")
+#Exponential
+filteredR <- filteredR[!is.na(filteredR$RespCorrectedWeight_GrCO2_KGr_Year),]
+ggplot(filteredR,aes(x=T3, y=RespCorrectedWeight_GrCO2_KGr_Year,color=Class))+
+  geom_point(size=1)+
+  stat_smooth(method = "lm",formula=y ~ exp(x))+
+  stat_regline_equation(formula=y ~ exp(x),aes(label=..rr.label..))+
+  labs(y=expression("g CO"[2]*" Year"^-1*"Kg DW"^-1),x="Temperature ºC")+
+  facet_wrap(~Species+DiamClass,scales="free")
 
 ggplot(filteredR,aes(x=Class,y=RespCorrectedWeight_GrCO2_KGr_Year,color=Class))+
   geom_boxplot()+

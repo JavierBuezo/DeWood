@@ -16,13 +16,14 @@ path.to.wd <- "C:/Users/javie/OneDrive - UPNA/DeWood Project/Respiration Campaig
 path.to.wd <- "D:/OneDrive - UPNA/DeWood Project/Respiration Campaign July 2021/"
 path.to.wd <- "D:/OneDrive - UPNA/DeWood Project/Respiration Campaign October 2021/"
 path.to.wd <- "D:/OneDrive - UPNA/DeWood Project/Respiration Campaign December/"
-
+path.to.wd <- "C:/Users/javie/Documents/DeWood GitHub/DeWood/Files/Respiration Campaing April 2022/"
 setwd(path.to.wd)
 
 # guardar la direcci?n a la carpeta en la que est?n los archivos
 path.to.data <- "C:/Users/javie/OneDrive - UPNA/DeWood Project/Respiration Campaign December/Teros"
 path.to.data <- "D:/OneDrive - UPNA/DeWood Project/Theros 11"
 path.to.data <- "D:/OneDrive - UPNA/DeWood Project/Respiration Campaign October 2021/Teros/"
+path.to.data <- "C:/Users/javie/Documents/DeWood GitHub/DeWood/Files/Respiration Campaing April 2022/Teros/"
 # cargar todos los archivos de la carpeta
 files_path <- list.files(path.to.data, full.names = T, pattern = ".xlsx")
 
