@@ -1,11 +1,26 @@
-
+library(ggplot2)
+library(data.table)
+library(dplyr)
+library(plyr)
+library(ggplot2)
+library(ggpubr)
+library(EnvStats)
 all <- fread("C:/Users/javie/Documents/DeWood GitHub/DeWood/Files/Final results/CSV/AllYearMeasurementsWDensity.csv")
 
 all$Class <- as.character(all$Class)
 all$type <- paste(all$DiamClass,all$Species,all$Class,sep="")
 filteredR <- filter(all,rsq > 0.8)
 filteredR <- filteredR[!is.na(filteredR$RespCorrectedWeight_GrCO2_KGr_Year),]
+
 #LINEAR
+
+filteredR$logtrans <- log10(filteredR$RespCorrectedWeight_GrCO2_KGr_Year)
+ggplot(filteredR,aes(x=T3, y=logtrans,color=Class))+
+  geom_point(size=1)+
+  geom_smooth(method = "lm")+
+  stat_regline_equation(aes(label=..rr.label..))+
+  labs(y=expression("g CO"[2]*" Year"^-1*"Kg DW"^-1),x="Temperature ºC")+
+  facet_wrap(~Species+DiamClass,scales="free")
 ggplot(filteredR,aes(x=T3, y=RespCorrectedWeight_GrCO2_KGr_Year,color=Class))+
   geom_point(size=1)+
   geom_smooth(method = "lm")+
