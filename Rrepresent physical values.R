@@ -540,3 +540,118 @@ corrplot(var1cm$cos2, is.corr=FALSE)
         PSD_biplotclass4FS
         dev.off ()
         
+  ############ Present the ionomics results in boxplots
+        colnames(results)
+        colnames(results)<-make.names(colnames(results))
+        Al <- ggplot(results, aes(x=Class, y = Al..mg.Kg.))+
+          geom_boxplot(aes(fill=Class))+
+          ylab("Al mg/Kg DW")+
+          facet_wrap(~Species+DiamClass)
+Al        
+        Ca <- ggplot(results, aes(x=Class, y = Ca..g.100g.))+
+          geom_boxplot(aes(fill=Class))+
+          ylab("Ca g/100g DW")+
+          facet_wrap(~Species+DiamClass)
+Ca        
+        Cu <- ggplot(results, aes(x=Class, y = Cu..mg.Kg.))+
+          geom_boxplot(aes(fill=Class))+
+          ylab("Cu mg/Kg DW")+
+          facet_wrap(~Species+DiamClass)
+Cu
+        Fe <- ggplot(results, aes(x=Class, y = Fe..mg.Kg.))+
+          geom_boxplot(aes(fill=Class))+
+          ylab("Fe mg/Kg DW")+
+          facet_wrap(~Species+DiamClass)
+Fe        
+        K <- ggplot(results, aes(x=Class, y = K..g.100g.))+
+          geom_boxplot(aes(fill=Class))+
+          ylab("K g/100g DW")+
+          facet_wrap(~Species+DiamClass)
+K        
+
+        Mg <- ggplot(results, aes(x=Class, y = Mg..g.100g.))+
+          geom_boxplot(aes(fill=Class))+
+          ylab("Mg g/100g DW")+
+          facet_wrap(~Species+DiamClass)
+Mg
+
+          Mn <- ggplot(results, aes(x=Class, y = Mn..mg.Kg.))+
+            geom_boxplot(aes(fill=Class))+
+            ylab("Mg mg/Kg DW")+
+            facet_wrap(~Species+DiamClass)
+Mn
+          P <- ggplot(results, aes(x=Class, y = P..g.100g.))+
+            geom_boxplot(aes(fill=Class))+
+            ylab("P g/100g DW")+
+            facet_wrap(~Species+DiamClass)
+P          
+          Rb <- ggplot(results, aes(x=Class, y = Rb..mg.Kg.))+
+            geom_boxplot(aes(fill=Class))+
+            ylab("Rb mg/Kg DW")+
+            facet_wrap(~Species+DiamClass)
+Rb          
+          Si <- ggplot(results, aes(x=Class, y = Si..mg.Kg.))+
+            geom_boxplot(aes(fill=Class))+
+            ylab("Si mg/Kg DW")+
+            facet_wrap(~Species+DiamClass)
+Si          
+          S <- ggplot(results, aes(x=Class, y = S..g.100g.))+
+            geom_boxplot(aes(fill=Class))+
+            ylab("S g/100g DW")+
+            ylim(0,0.05)+
+            facet_wrap(~Species+DiamClass)
+S
+
+          Sr <- ggplot(results, aes(x=Class, y = Sr..mg.Kg.))+
+            geom_boxplot(aes(fill=Class))+
+            ylab("Sr g/100g DW")+
+            facet_wrap(~Species+DiamClass)
+Sr          
+
+          Ti <- ggplot(results, aes(x=Class, y = Ti..mg.Kg.))+
+            geom_boxplot(aes(fill=Class))+
+            ylab("Ti mg/Kg DW")+
+            facet_wrap(~Species+DiamClass)
+Ti
+
+          Zn <- ggplot(results, aes(x=Class, y = Zn..mg.Kg.))+
+            geom_boxplot(aes(fill=Class))+
+            ylab("Zn mg/kg DW")+
+            facet_wrap(~Species+DiamClass)
+Zn
+          CNRatio <- ggplot(results, aes(x=Class, y = CNRatio))+
+            geom_boxplot(aes(fill=Class))+
+            ylab("C/N")+
+            facet_wrap(~Species+DiamClass)
+CNRatio
+          Ntotal <- ggplot(results, aes(x=Class, y = Ntotal..g.100g.))+
+            geom_boxplot(aes(fill=Class))+
+            ylab("Nitrogen g/100g DW")+
+            facet_wrap(~Species+DiamClass)
+Ntotal
+          Ctotal <- ggplot(results, aes(x=Class, y = Ctotal..g.100g.))+
+            geom_boxplot(aes(fill=Class))+
+            ylab("Carbon g/100g DW")+
+            facet_wrap(~Species+DiamClass)
+Ctotal
+
+getwd()
+pdf("Ionomics, Carbon and Nitrogen.pdf")
+Al        
+Ca        
+Cu
+Fe        
+K        
+Mg
+Mn
+P          
+Rb          
+Si          
+S
+Sr          
+Ti
+Zn
+CNRatio
+Ntotal
+Ctotal
+dev.off ()
