@@ -235,6 +235,9 @@ prueba <- lapply(nagosensors_unique,function(x){
   juntos <- left_join(nago,teros,by="time")
 })
 final <- bind_rows(prueba)
+ncol(final)
+
+
 final <- final %>% 
   mutate(day = floor_date(time,"day"))
 
@@ -244,51 +247,55 @@ finalnotfrozen <- final[final$day %in% daysfroze.list,]
   
 finalfiltered <- finalnotfrozen[,c("sample_code","time","avgWC","avgTerosWC")]
 
-library(reshape2)
-# finalfiltered$avgTerosWC = finalfiltered$avgTerosWC*1000
+write.csv(finalfiltered,"TerosAndNagoSensors_byHour.csv",row.names = FALSE)
 
-finalfiltered$avgWCcentered<- scale(finalfiltered$avgWC,center=TRUE,scale=TRUE)
-finalfiltered$avgTerosWCcentered<- scale(finalfiltered$avgTerosWC,center=TRUE,scale=TRUE)
+###################
 
-start_val_sigmoid <- function(x, y) {
-  fit <- lm(log(y[which.max(x)] - y + 1e-6) ~ x)
-  list(
-    a = y[which.max(x)],
-    r = unname(-coef(fit)[2]))
-}
 
-lista <- start_val_sigmoid(finalfiltered$avgWC,finalfiltered$avgTerosWC)
-lista
-m <- NULL
-m <- nls(avgTerosWC ~ a*exp(r* avgWC), data = finalfiltered,start=lista,trace=TRUE)
-
-m <- nls(avgWC ~ a*exp(r* avgTerosWC), data = finalfiltered,start=lista)
-
-# m <- nls(avgTerosWC ~ a*exp(r* avgWC), data = finalfiltered,start= list(a=5842404.74, r=-66.72))
-
-m
-
-p <- coef(m)
-p
-
-#########Trying to SCALE THE VARIABLES###########
-lista<- start_val_sigmoid(finalfiltered$avgTerosWCcentered,finalfiltered$avgWCcentered)
-lista
-m <- NULL
-m <- nls(avgTerosWCcentered ~ a*exp(r* avgWCcentered), data = finalfiltered,start=list(a=0.5,r=0.2),trace=TRUE)
-p <- coef(m)
-p
-dev.off()
-plot(finalfiltered$avgWCcentered,finalfiltered$avgTerosWCcentered)
-curve(p["a"]*exp(p["r"]*x),lwd=2,col="Red",add=TRUE)
-####AQUI#####AYUDA CON EL SCRIPT! PORFA
-
-dev.off()
-plot(finalfiltered$avgWC,finalfiltered$avgTerosWC)
-curve(p["a"]*exp(p["r"]*x),lwd=2,col="Red",add=TRUE)
-
-plot(finalfiltered$avgTerosWC,finalfiltered$avgWC)
-curve(p["a"]*exp(p["r"]*x),lwd=2,col="Red",add=TRUE)
+# library(reshape2)
+# # finalfiltered$avgTerosWC = finalfiltered$avgTerosWC*1000
+# 
+# 
+# 
+# start_val_sigmoid <- function(x, y) {
+#   fit <- lm(log(y[which.max(x)] - y + 1e-6) ~ x)
+#   list(
+#     a = y[which.max(x)],
+#     r = unname(-coef(fit)[2]))
+# }
+# 
+# lista <- start_val_sigmoid(finalfiltered$avgWC,finalfiltered$avgTerosWC)
+# lista
+# m <- NULL
+# m <- nls(avgTerosWC ~ a*exp(r* avgWC), data = finalfiltered,start=lista,trace=TRUE)
+# 
+# m <- nls(avgWC ~ a*exp(r* avgTerosWC), data = finalfiltered,start=lista)
+# 
+# # m <- nls(avgTerosWC ~ a*exp(r* avgWC), data = finalfiltered,start= list(a=5842404.74, r=-66.72))
+# 
+# m
+# 
+# p <- coef(m)
+# p
+# 
+# #########Trying to SCALE THE VARIABLES###########
+# lista<- start_val_sigmoid(finalfiltered$avgTerosWCcentered,finalfiltered$avgWCcentered)
+# lista
+# m <- NULL
+# m <- nls(avgTerosWCcentered ~ a*exp(r* avgWCcentered), data = finalfiltered,start=list(a=0.5,r=0.2),trace=TRUE)
+# p <- coef(m)
+# p
+# dev.off()
+# plot(finalfiltered$avgWCcentered,finalfiltered$avgTerosWCcentered)
+# curve(p["a"]*exp(p["r"]*x),lwd=2,col="Red",add=TRUE)
+# ####AQUI#####AYUDA CON EL SCRIPT! PORFA
+# 
+# dev.off()
+# plot(finalfiltered$avgWC,finalfiltered$avgTerosWC)
+# curve(p["a"]*exp(p["r"]*x),lwd=2,col="Red",add=TRUE)
+# 
+# plot(finalfiltered$avgTerosWC,finalfiltered$avgWC)
+# curve(p["a"]*exp(p["r"]*x),lwd=2,col="Red",add=TRUE)
 
 ##############REPRESENTACIONES
 #################

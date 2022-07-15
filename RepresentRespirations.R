@@ -13,7 +13,6 @@ filteredR <- filter(all,rsq > 0.8)
 filteredR <- filteredR[!is.na(filteredR$RespCorrectedWeight_GrCO2_KGr_Year),]
 
 #LINEAR
-
 filteredR$logtrans <- log10(filteredR$RespCorrectedWeight_GrCO2_KGr_Year)
 ggplot(filteredR,aes(x=T3, y=logtrans,color=Class))+
   geom_point(size=1)+
@@ -27,6 +26,29 @@ ggplot(filteredR,aes(x=T3, y=RespCorrectedWeight_GrCO2_KGr_Year,color=Class))+
   stat_regline_equation(aes(label=..rr.label..))+
   labs(y=expression("g CO"[2]*" Year"^-1*"Kg DW"^-1),x="Temperature ÂºC")+
   facet_wrap(~Species+DiamClass,scales="free")
+
+tmpnagoavg<- na.omit(tmpnago.hour) %>% dplyr::group_by(time,sample_code) %>% mutate (avgWC=mean(impedance)) %>% ungroup
+colnames(filteredR)
+onlyresp <- filteredR[,c("RespCorrectedWeight_GrCO2_KGr_Year","Class","Species","DiamClass","Month")]
+
+mediamonth <- na.omit(onlyresp) %>% dplyr::group_by(Month,Class,Species,DiamClass) %>% mutate(RespMean=mean(RespCorrectedWeight_GrCO2_KGr_Year),stDev=sd(RespCorrectedWeight_GrCO2_KGr_Year),n=length(RespCorrectedWeight_GrCO2_KGr_Year),
+                                                                                              se=stDev/sqrt(n))  %>% ungroup
+mediamonth$RespCorrectedWeight_GrCO2_KGr_Year <- NULL
+mediamonth <- unique(mediamonth)
+getwd()
+write.csv(mediamonth,"MediasRespMes Supplementary.csv",row.names = FALSE)
+####LOGARITMIC TRANSFORMATION OF RESPIRATION
+filteredR$LogResp <- log(filteredR$RespCorrectedWeight_GrCO2_KGr_Year,base=10)
+filteredR <- filteredR[is.finite(filteredR$LogResp),]
+
+ggplot(filteredR,aes(x=T3, y=LogResp,color=Class))+
+  geom_point(size=1)+
+  geom_smooth(method = "lm")+
+  stat_regline_equation(aes(label=..rr.label..))+
+  labs(y=expression("Log g CO"[2]*" Year"^-1*"Kg DW"^-1),x="Temperature ºC")+
+  facet_wrap(~Species+DiamClass,scales="free")
+what <- filter(filteredR,filteredR$LogResp <0)
+min(filteredR$LogResp)
 #Quadratic
 install.packages("ggpmisc")
 library(ggpmisc)

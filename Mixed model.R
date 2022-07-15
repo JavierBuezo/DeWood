@@ -14,7 +14,7 @@ library(metafor)
 rma.glmulti <- function(formula, data, ...)
   rma(formula, RespCorrectedWeight_GrCO2_KGr_Year, data=data, method="ML", ...)
 
-res <- glmulti(RespCorrectedWeight_GrCO2_KGr_Year ~  DiamClass + Class + T3 + Soil_moist + DensityKgM3+Plot...16, data=dat,
+res <- glmulti(RespCorrectedWeight_GrCO2_KGr_Year ~  DiamClass + Class*DensityKgM3 + T3 + Soil_moist + +Plot...16, data=dat,
                level=1, fitfunction=rma.glmulti, crit="aicc")
 
 print(res)
