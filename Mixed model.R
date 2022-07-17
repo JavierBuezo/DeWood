@@ -2,6 +2,7 @@ library(data.table)
 library(dplyr)
 
 data <- fread("C:/Users/javie/Documents/DeWood GitHub/DeWood/Files/Final results/CSV/AllYearMeasurementsWDensity.csv")
+data <- fread("C:/Users/javier/Documents/DeWood Git/DeWood/Files/Final results/CSV/AllYearMeasurementsWDensity.csv")
 ####NA management following https://www.metafor-project.org/doku.php/tips:model_selection_with_glmulti_and_mumin"
 ###We are going to use Species, DiamClass, Class,T3,Soil_moist,DensityKgM3 and RespCorrectedWeight_GrCO2_KGr_Year
 data <- data[!apply(data[,c("Species", "DiamClass", "Class", "T3", "Soil_moist", "DensityKgM3", "RespCorrectedWeight_GrCO2_KGr_Year","Plot...16")], 1, anyNA),]
@@ -14,7 +15,7 @@ library(metafor)
 rma.glmulti <- function(formula, data, ...)
   rma(formula, RespCorrectedWeight_GrCO2_KGr_Year, data=data, method="ML", ...)
 
-res <- glmulti(RespCorrectedWeight_GrCO2_KGr_Year ~  DiamClass + Class*DensityKgM3 + T3 + Soil_moist + +Plot...16, data=dat,
+res <- glmulti(RespCorrectedWeight_GrCO2_KGr_Year ~  DiamClass + Class*DensityKgM3 + T3 + Soil_moist, data=data,
                level=1, fitfunction=rma.glmulti, crit="aicc")
 
 print(res)
